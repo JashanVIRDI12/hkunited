@@ -1,26 +1,535 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ============================================================
+   HK UNITED — DESIGN SYSTEM
+   Editorial light. Paper surfaces, near-black ink, Royal Blue.
+
+   Tokens are ROLE-named (`paper`, `ink`) rather than colour-named,
+   so the palette can be retuned without renaming across components.
+
+   CONTRAST CONTRACT — verified by `npm run audit:contrast`
+     · every ink tier clears 4.5:1 on EVERY paper surface
+     · brand #0057FF clears 5.52:1 as text AND as a fill under white
+     · red #E53935 is 4.23:1 — LARGE DISPLAY TYPE AND GRAPHIC USE ONLY.
+       For small text or white-on-red fills use `red-deep` (5.62:1).
+   ============================================================ */
+
+@theme {
+  /* --- Surfaces --------------------------------------------- */
+  --color-paper: #ffffff;
+  --color-paper-alt: #f4f5f7;
+  --color-paper-sunk: #eaecf0;
+  /* Kept light enough that even `brand` and `ink-4` — the two lowest
+     contrast marks — still clear AA on it, so this surface can carry
+     text later without re-auditing. */
+  --color-paper-deep: #e8ebef;
+  --color-line: #e1e4e9;
+  --color-line-strong: #c8ccd4;
+
+  /* --- Ink: worst case is on --color-paper-deep --------------
+     ink 17.6 · ink-2 7.1 · ink-3 5.5 · ink-4 4.6              */
+  --color-ink: #0a0c10;
+  --color-ink-2: #454b57;
+  --color-ink-3: #545b68;
+  --color-ink-4: #5f6675;
+
+  /* --- Ink panel: the dark CARD surface ----------------------
+     Softer than `ink`, which is near-black and reads as a hole
+     punched in the page when it fills a rounded card sitting
+     between two light ones. White clears 15.2:1 on it, so the
+     softening costs nothing in legibility. `ink` is still the
+     surface for FULL-BLEED dark bands, where near-black is the
+     point.                                                    */
+  --color-ink-panel: #23262b;
+
+  /* --- Brand: Royal Blue ------------------------------------
+     Text on paper 5.52:1 · white on brand fill 5.52:1
+     Worst case is `paper-deep` at 4.61:1.
+
+     THE ACCENT IS THE ONLY COLOUR IN THE SYSTEM. Everything
+     else is white, grey and ink, which is what makes a single
+     blue mark — a button, a route node, an icon glyph — carry
+     as much weight as it does. Spend it on a second hue and
+     both stop meaning anything.                               */
+  --color-brand: #0057ff;
+  --color-brand-deep: #0040b8;
+  --color-brand-wash: #eef3ff;
+
+  /* --- Secondary: Red ---------------------------------------
+     SEMANTIC ONLY — form errors, nothing decorative. The card
+     layout carries no red at all; `red` remains defined
+     because the enquiry form's invalid state needs it and the
+     audit needs to keep asserting it. `red-deep` carries small
+     text and any fill sitting under white labels.             */
+  --color-red: #e53935;
+  --color-red-deep: #c62828;
+  --color-red-wash: #fdeeee;
+
+  /* --- Scrim: the only dark surface --------------------------
+     Exists solely to hold white type legible over photography. */
+  --color-scrim: #07080a;
+
+  /* --- Semantic --------------------------------------------- */
+  --color-background: var(--color-paper);
+  --color-foreground: var(--color-ink);
+  --color-border: var(--color-line);
+
+  /* --- Type --------------------------------------------------
+     Typography is the hero: the display tier is deliberately
+     enormous and tracks tight enough to hold at 10rem.        */
+  /* Instrument Serif for display, Inter for everything small. The
+     technical "label" voice is achieved with uppercase + wide tracking +
+     tabular numerals on Inter rather than by loading a third family.
+
+     The serif fallback stack matters more than a sans one would: Georgia
+     and Times are the only faces on most systems with comparable stroke
+     contrast, so a `sans-serif` fallback here would paint a completely
+     different-looking headline before the swap. */
+  --font-display: var(--font-instrument-serif), ui-serif, Georgia,
+    "Times New Roman", serif;
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --text-eyebrow: 0.75rem;
+  /*
+   * One tier above `mega`, and the only tier allowed to collide with
+   * photography. Reserved for the /about masthead — see `.type-colossal`.
+   *
+   * 15vw IS A MEASURED CEILING, not a taste value. Lines at this tier are
+   * set `whitespace-nowrap`, so a size that is too large does not wrap — it
+   * clips at the bleed. The ceiling was measured against Montserrat at
+   * ~0.51em average glyph width; Instrument Serif is narrower still, so the
+   * budget only gained headroom when the face changed.
+   *
+   * NO COMPONENT CURRENTLY USES THIS TIER. It belonged to the /about
+   * masthead's display-line composition, which is now a card hero. The
+   * token is kept because the tier is still the top of the scale and the
+   * editorial page-mastheads could reach for it, but anything adopting it
+   * needs to re-measure the line lengths above.
+   */
+  --text-colossal: clamp(4rem, 15vw, 16rem);
+  --text-mega: clamp(3.5rem, 12vw, 11rem);
+  --text-display: clamp(3rem, 8.5vw, 8rem);
+  --text-h1: clamp(2.5rem, 5.5vw, 5rem);
+  --text-h2: clamp(2rem, 4vw, 3.5rem);
+  --text-h3: clamp(1.375rem, 2.2vw, 2rem);
+  --text-lead: clamp(1.25rem, 2.2vw, 2rem);
+  --text-body-lg: clamp(1.0625rem, 1.3vw, 1.1875rem);
+
+  /* --- Radius ------------------------------------------------
+     Softness is a tier, not a decoration. Full-bleed elements
+     stay square — a rounded corner that touches the viewport
+     edge reads as a mistake — so `none` is a deliberate choice
+     at those call sites rather than the absence of a token.   */
+  --radius-soft: 0.75rem;
+  --radius-plate: 1.25rem;
+  --radius-panel: 1.75rem;
+
+  /* --- Elevation ---------------------------------------------
+     Two steps, both barely there. The job is to lift a surface
+     off the page, never to draw a box around it: alpha stays
+     under 0.12 and the blur runs long, so what reads is the
+     shadow's falloff rather than its edge.                    */
+  --shadow-lift: 0 1px 2px rgba(10, 12, 16, 0.04),
+    0 10px 28px -10px rgba(10, 12, 16, 0.09);
+  --shadow-float: 0 2px 4px rgba(10, 12, 16, 0.04),
+    0 20px 52px -14px rgba(10, 12, 16, 0.13);
+
+  /* --- Motion ------------------------------------------------
+     One ease across the entire site. Power4.out only.         */
+  --ease-brand: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* --- Rhythm ------------------------------------------------
+     Sections breathe far harder than a typical business site. */
+  --spacing-gutter: clamp(1.25rem, 4.5vw, 5rem);
+  --spacing-section: clamp(7rem, 16vw, 15rem);
+
+  /*
+   * THE CARD LAYOUT'S OWN RHYTHM — homepage only.
+   *
+   * `--spacing-section` is an EDITORIAL measure: it puts a screen of air
+   * between blocks so each one arrives alone, which is right for the
+   * interior pages where every section is a long read. The homepage is now
+   * a stack of cards, and cards need to read as a continuous surface — at
+   * 15rem apart they stop being a layout and become nine separate pages.
+   *
+   * The gutter is tighter for the same reason: these cards run nearly to
+   * the viewport edge, so the margin is a frame around the stack rather
+   * than a reading measure.
+   */
+  --spacing-band: clamp(3.5rem, 6vw, 6rem);
+  --spacing-page-gutter: clamp(1rem, 2.2vw, 1.75rem);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* ============================================================
+   VARIANTS
+   ============================================================ */
 
-@media (prefers-color-scheme: dark) {
+/*
+ * `deck:` — the viewport a stacking deck needs.
+ *
+ * A card that sticks has to fit between its parked offset and the bottom of
+ * the screen, or it freezes with its own foot cut off, which reads as a
+ * broken layout rather than as a deliberate one. The studies deck runs about
+ * 43rem of card under a 6rem header plus its stacked edges, so it asks for
+ * 52rem of viewport height before it engages — and falls back to an ordinary
+ * column of cards on anything shorter, which is most laptops in a windowed
+ * browser.
+ *
+ * WIDTH ALONE IS NOT THE QUESTION, which is why this exists at all: `lg:`
+ * would engage the deck on a 1440×700 window, the exact case it fails.
+ *
+ * Keep in sync with `DECK_QUERY` in `components/motion/stack-card.tsx` —
+ * that file's `matchMedia` scopes the recede tween to the same viewport, and
+ * a card that sticks without receding is worse than one that does neither.
+ */
+@custom-variant deck (@media (min-width: 64rem) and (min-height: 52rem));
+
+/* ============================================================
+   BASE
+   ============================================================ */
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /*
+   * THE FIXED HEADER'S HEIGHT, PUBLISHED SO LAYOUT CAN CLEAR IT.
+   *
+   * The header is `position: fixed`, so it contributes no height to the
+   * document and anything opening a page at the top sits under it. The
+   * homepage gets away with `pt-3` because its header state is TRANSPARENT
+   * over the footage — the bar is meant to be on the hero. Every other page
+   * paints the header as white glass, where the same overlap reads as a
+   * clipped card.
+   *
+   * MIRRORS `site-header.tsx`: `h-20 md:h-24`. If that changes, change this.
+   * The scrolled state (`h-16`) is deliberately NOT modelled — by the time
+   * it applies the page has scrolled and nothing needs clearing.
+   */
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --header-h: 5rem;
+  }
+  @media (min-width: 48rem) {
+    :root {
+      --header-h: 6rem;
+    }
+  }
+
+  /* Lenis owns scroll; native smooth would fight it. */
+  html.lenis,
+  html.lenis body {
+    height: auto;
+  }
+  html.lenis {
+    scroll-behavior: auto;
+  }
+  .lenis.lenis-smooth {
+    scroll-behavior: auto !important;
+  }
+  .lenis.lenis-stopped {
+    overflow: hidden;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-family: var(--font-sans);
+    font-synthesis-weight: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  ::selection {
+    background-color: var(--color-brand);
+    color: #fff;
+  }
+
+  /* Visible focus, never removed — only shaped. The radius here is a
+     floor, not an override: an element with its own larger radius keeps
+     it, so the ring hugs pills and panels instead of cutting corners. */
+  :focus-visible {
+    outline: 2px solid var(--color-brand);
+    outline-offset: 3px;
+    border-radius: var(--radius-soft);
+  }
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    text-wrap: balance;
+  }
+  p {
+    text-wrap: pretty;
+  }
+
+  button,
+  a {
+    cursor: pointer;
+  }
+
+  img,
+  video {
+    max-width: 100%;
+    height: auto;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+/* ============================================================
+   COMPONENTS
+   The label classes, and ONLY the label classes.
+
+   They live here rather than in `@layer utilities` because they are the
+   only hand-written classes in this file that set COLOUR, and colour is
+   the one property their call sites routinely need to override: the same
+   eyebrow appears in `ink-4` on paper and in `white/45` on a plate.
+
+   In `@layer utilities` they lost that argument silently. Both the class
+   and `text-white/45` are single-class selectors, so specificity ties and
+   source order decides — and a hand-written rule sits after the generated
+   utilities in the same layer, so the class won every time. The label on
+   /about's, /fleet's and /services' plates rendered in `ink-4`, which is
+   2.4:1 on a dark card: invisible-adjacent, and a contrast failure the
+   system's own contract does not cover, because that contract is written
+   for ink on PAPER.
+
+   `@layer components` sorts before `@layer utilities`, so any utility now
+   beats them regardless of source order. Nothing else in this file sets
+   colour, which is why nothing else moved.
+   ============================================================ */
+
+@layer components {
+  /*
+   * Section marker — `/ Services`. The slash is drawn by the component, not
+   * by a `::before`, so it is real text that survives copy-paste and is
+   * announced in reading order.
+   */
+  .section-label {
+    font-family: var(--font-sans);
+    font-size: 0.8125rem;
+    letter-spacing: 0.01em;
+    color: var(--color-ink-4);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Technical label — the industrial voice of the system.
+     Inter, uppercase, widely tracked, tabular numerals. */
+  .eyebrow {
+    font-family: var(--font-sans);
+    font-size: var(--text-eyebrow);
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-ink-4);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /*
+   * Rotated marginal label. Real text in normal reading order — assistive
+   * tech and selection are unaffected, only the paint direction changes.
+   */
+  .label-vertical {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+    font-family: var(--font-sans);
+    font-size: var(--text-eyebrow);
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    color: var(--color-ink-4);
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+/* ============================================================
+   UTILITIES
+   ============================================================ */
+
+@layer utilities {
+  .container-edge {
+    width: 100%;
+    padding-inline: var(--spacing-gutter);
+    margin-inline: auto;
+    max-width: 110rem;
+  }
+
+  .container-read {
+    width: 100%;
+    padding-inline: var(--spacing-gutter);
+    margin-inline: auto;
+    max-width: 60rem;
+  }
+
+  .section-y {
+    padding-block: var(--spacing-section);
+  }
+
+  /*
+   * The homepage container. Wider and tighter-guttered than
+   * `container-edge`, because the cards are meant to sit close to the
+   * viewport edge with the page showing as a thin frame around them.
+   *
+   * The site header deliberately stays on `container-edge`, whose gutter is
+   * larger. That difference is not an oversight: it is what insets the logo
+   * and nav from the hero card's edge instead of jamming them against its
+   * corner radius.
+   */
+  /*
+   * 120rem, not 100rem. At 100rem a 1728px window left ~64px of dead margin
+   * OUTSIDE the gutter, so the frame around the cards read as two different
+   * margins stacked. Capping at 120rem means the gutter alone sets the frame
+   * on every laptop and desktop width, and the cap only engages on ultrawide
+   * displays — where an uncapped card would otherwise run to 3000px.
+   */
+  .container-page {
+    width: 100%;
+    padding-inline: var(--spacing-page-gutter);
+    margin-inline: auto;
+    max-width: 120rem;
+  }
+
+  .band-y {
+    padding-block: var(--spacing-band);
+  }
+
+  /*
+   * Display tiers are Instrument Serif, at its single weight of 400.
+   *
+   * TRACKING IS NEAR-NEUTRAL, and that is the change a serif forces. The
+   * previous tiers ran -0.035em to -0.055em to pull Montserrat's wide
+   * geometric forms together. A serif is already narrow and, more to the
+   * point, its serifs occupy the space between letters — negative tracking
+   * at that scale collides them into each other and the word turns into a
+   * fence. Each tier now sits just under neutral, tightening only slightly
+   * as it grows.
+   *
+   * LINE-HEIGHTS ARE LOOSER for the same reason. Instrument Serif has tall
+   * ascenders and real descenders; at the old 0.82 the lines interlocked.
+   */
+  .type-colossal {
+    font-family: var(--font-display);
+    font-size: var(--text-colossal);
+    line-height: 0.92;
+    letter-spacing: -0.02em;
+    font-weight: 400;
+  }
+
+  /*
+   * At display scale the left side bearing is a visible indent, so the
+   * first glyph is pulled optically flush with the column. Type this large
+   * is aligned by eye, not by box. The value tracks the tightest tier's
+   * letter-spacing.
+   */
+  .optical-flush {
+    margin-left: -0.02em;
+  }
+
+  .type-mega {
+    font-family: var(--font-display);
+    font-size: var(--text-mega);
+    line-height: 0.96;
+    letter-spacing: -0.018em;
+    font-weight: 400;
+  }
+
+  .type-display {
+    font-family: var(--font-display);
+    font-size: var(--text-display);
+    line-height: 1;
+    letter-spacing: -0.016em;
+    font-weight: 400;
+  }
+
+  .type-h1 {
+    font-family: var(--font-display);
+    font-size: var(--text-h1);
+    line-height: 1.06;
+    letter-spacing: -0.014em;
+    font-weight: 400;
+  }
+
+  .type-h2 {
+    font-family: var(--font-display);
+    font-size: var(--text-h2);
+    line-height: 1.1;
+    letter-spacing: -0.012em;
+    font-weight: 400;
+  }
+
+  /*
+   * The smallest display tier, and the one closest to the size where
+   * Instrument Serif's thin strokes start to disappear. Tracking goes to
+   * neutral here rather than negative.
+   */
+  .type-h3 {
+    font-family: var(--font-display);
+    font-size: var(--text-h3);
+    line-height: 1.25;
+    letter-spacing: 0;
+    font-weight: 400;
+  }
+
+  /* Lead paragraphs stay in Inter — they are read, not looked at. */
+  .type-lead {
+    font-size: var(--text-lead);
+    line-height: 1.4;
+    letter-spacing: -0.015em;
+  }
+
+  /* Numerals in tables and stat rows must not wobble. */
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /*
+   * Deep-link landing offset.
+   *
+   * The header is fixed, so an element scrolled to by `#fragment` lands
+   * underneath it. The value clears the condensed header (4rem) plus the
+   * breathing room that makes the target read as the top of a section
+   * rather than as content jammed against a bar.
+   *
+   * Applies to native fragment navigation, which is what carries the
+   * cross-page links (`/fleet#dump-truck`). Lenis takes over only for
+   * scrolls it initiates.
+   */
+  .anchor-offset {
+    scroll-margin-top: 7rem;
+  }
+
+  .hide-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+/* ============================================================
+   REDUCED MOTION
+   GSAP also checks this (src/lib/motion.ts) and RESOLVES
+   timelines to their final state rather than disabling them —
+   a disabled reveal would strand content at opacity:0.
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -20,6 +20,9 @@
 # production
 /build
 
+# uncompressed asset masters — the web derivatives under /public are what ship
+/assets-source
+
 # misc
 .DS_Store
 *.pem
