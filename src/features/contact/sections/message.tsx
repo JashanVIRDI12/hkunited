@@ -1,6 +1,7 @@
 import { COMPANY } from "@/content/company";
 import { EnquiryForm } from "@/features/enquiry/form";
 import { Reveal } from "@/components/motion/reveal";
+import { SplitHeading } from "@/components/motion/split-heading";
 
 /**
  * Send a message.
@@ -21,9 +22,9 @@ export function Message() {
         <div className="grid gap-x-16 gap-y-12 lg:grid-cols-12">
           <div className="lg:col-span-4">
             <p className="eyebrow mb-8">Write</p>
-            <h2 id="message-heading" className="type-h1 max-w-[10ch] text-ink">
+            <SplitHeading id="message-heading" className="type-h1 max-w-[10ch] text-ink">
               Or put it in writing.
-            </h2>
+            </SplitHeading>
             <p className="mt-8 max-w-sm leading-relaxed text-ink-2">
               For anything that is not urgent, or that needs a record. If you
               already know what needs moving, the quote form asks the right

@@ -55,7 +55,13 @@ export function PageHero({
         className="container-page pt-[calc(var(--header-h)+0.75rem)]"
         aria-labelledby={headingId}
       >
-        <ClipReveal from="bottom" duration={1.2} scale={false}>
+        {/*
+          `scale={false}`: this card carries TYPE, not just a plate. A settle
+          scale on a container whose children include a headline re-renders
+          that text at a fractional size for the length of the tween, which
+          on a serif at display scale is visibly soft.
+        */}
+        <ClipReveal from="left" duration={1.2} scale={false}>
           <div className="relative overflow-hidden rounded-plate bg-ink">
             <div className="absolute inset-0">
               <Media

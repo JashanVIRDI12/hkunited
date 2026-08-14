@@ -1,6 +1,7 @@
 import { Quote } from "lucide-react";
 import { Panel, IconBadge, SectionLabel } from "@/components/ui/panel";
 import { ScrollText } from "@/components/motion/scroll-text";
+import { Reveal } from "@/components/motion/reveal";
 
 /**
  * The company, in its own words.
@@ -29,7 +30,7 @@ export function Statement() {
         HK United in its own words
       </h2>
 
-      <div className="mt-6">
+      <Reveal variant="cards" className="mt-6">
         <Panel tone="paper" className="p-7 md:p-12 lg:p-16">
           <IconBadge icon={Quote} />
           <ScrollText className="mt-8 max-w-[26ch] font-display text-[clamp(1.375rem,2.6vw,2.25rem)] leading-[1.3] tracking-[-0.012em] text-ink md:max-w-[34ch]">
@@ -41,7 +42,7 @@ export function Statement() {
             driver training, held continuously rather than proven once.
           </p>
         </Panel>
-      </div>
+      </Reveal>
     </section>
   );
 }

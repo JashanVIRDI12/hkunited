@@ -120,14 +120,27 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: jsonLd(organizationSchema()) }}
         />
         {/*
-          Reveal animations start at opacity:0 and are cleared by GSAP.
-          `MaskLines` additionally parks each line below its mask. Without JS
-          both would leave content invisible, so restore them for no-JS
-          agents. Crawlers still receive full server-rendered HTML.
+          THERE IS NO LONGER A NO-JS ESCAPE HATCH HERE, BECAUSE THERE IS NO
+          LONGER ANYTHING TO ESCAPE.
+
+          This used to carry a `<noscript>` rule un-hiding two classes: the
+          `opacity-0` that every `Reveal` rendered with, and the transform
+          `MaskLines` parked each line under. Both components hid content in
+          the MARKUP and depended on GSAP to release it, so without
+          JavaScript the page rendered a set of headline-shaped holes.
+
+          A stylesheet that only fires for `<noscript>` covers exactly one of
+          the ways that arrangement fails, and it is the rarest one. It does
+          nothing for a chunk that 404s, a runtime error thrown before the
+          effect, a trigger that mis-measures against pre-swap font metrics,
+          or content that loads already past its own trigger point — and this
+          site shipped an invisible headline twice to the last two of those.
+
+          Every reveal now renders its content in place and applies the start
+          state from the same code that animates it away, before paint. The
+          failure mode inverted: no JavaScript, no animation, all content. See
+          the note at the top of `lib/motion.ts`.
         */}
-        <noscript>
-          <style>{`.opacity-0{opacity:1 !important}.motion-parked{transform:none !important}`}</style>
-        </noscript>
       </head>
       <body className="antialiased">
         <IntroLoader />

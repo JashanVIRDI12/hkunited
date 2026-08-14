@@ -3,6 +3,8 @@ import { DIFFERENTIATORS } from "@/content/safety";
 import { IMAGES } from "@/content/imagery";
 import { Media } from "@/components/ui/media";
 import { Panel, IconBadge, SectionLabel } from "@/components/ui/panel";
+import { Reveal } from "@/components/motion/reveal";
+import { SplitHeading } from "@/components/motion/split-heading";
 
 /**
  * Why they trust us — the bento.
@@ -38,11 +40,24 @@ export function Why() {
   return (
     <section className="container-page band-y" aria-labelledby="why-heading">
       <SectionLabel>Advantages</SectionLabel>
-      <h2 id="why-heading" className="type-h2 mt-6 max-w-[16ch] text-ink">
+      <SplitHeading
+        id="why-heading"
+        className="type-h2 mt-6 max-w-[16ch] text-ink"
+      >
         Why they keep calling us back
-      </h2>
+      </SplitHeading>
 
-      <div className="mt-10 grid gap-3 md:mt-14 lg:grid-cols-12">
+      {/*
+        THE BENTO STAGGERS IN READING ORDER, which is the only order that
+        makes sense here: the tall dark card is the argument the company wins
+        on, and it is first in the DOM precisely so it is read first. A grid
+        that revealed from the centre or at random would undo that.
+      */}
+      <Reveal
+        stagger
+        variant="cards"
+        className="mt-10 grid gap-3 md:mt-14 lg:grid-cols-12"
+      >
         <Panel
           tone="dark"
           className="flex flex-col justify-between gap-16 p-7 lg:col-span-4 lg:row-span-2"
@@ -108,9 +123,9 @@ export function Why() {
             during the job rather than assembled after it.
           </p>
         </Panel>
-      </div>
+      </Reveal>
 
-      <div className="mt-3">
+      <Reveal className="mt-3">
         <Panel tone="sunk" className="flex flex-wrap items-center gap-x-6 gap-y-4 p-6">
           <IconBadge icon={Truck} />
           <p className="max-w-[70ch] text-[0.9375rem] leading-relaxed text-ink-2">
@@ -119,7 +134,7 @@ export function Why() {
             one point of contact.
           </p>
         </Panel>
-      </div>
+      </Reveal>
     </section>
   );
 }

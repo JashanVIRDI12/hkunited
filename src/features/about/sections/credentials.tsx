@@ -4,6 +4,9 @@ import { IMAGES } from "@/content/imagery";
 import { Media } from "@/components/ui/media";
 import { Panel, IconBadge, SectionLabel } from "@/components/ui/panel";
 import { TextLink } from "@/components/ui/button";
+import { Reveal } from "@/components/motion/reveal";
+import { SplitHeading } from "@/components/motion/split-heading";
+import { ClipReveal } from "@/components/motion/clip-reveal";
 
 /**
  * Credentials.
@@ -34,9 +37,12 @@ export function Credentials() {
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
           <SectionLabel>Credentials</SectionLabel>
-          <h2 id="credentials-heading" className="type-h2 mt-6 max-w-[14ch] text-ink">
+          <SplitHeading
+            id="credentials-heading"
+            className="type-h2 mt-6 max-w-[14ch] text-ink"
+          >
             Accountable to more than ourselves
-          </h2>
+          </SplitHeading>
         </div>
         <p className="max-w-sm text-[0.9375rem] leading-relaxed text-ink-3 md:pb-2">
           Membership means an outside body has standards we agreed to be held
@@ -45,7 +51,7 @@ export function Credentials() {
         </p>
       </div>
 
-      <div className="mt-10 grid gap-3 md:mt-14 lg:grid-cols-12">
+      <Reveal stagger variant="cards" className="mt-10 grid gap-3 md:mt-14 lg:grid-cols-12">
         {AFFILIATIONS.map((affiliation) => (
           <Panel key={affiliation.abbr} tone="paper" className="p-7 lg:col-span-4">
             <p className="font-display text-[clamp(2.5rem,4.5vw,4rem)] leading-none tracking-[-0.016em] text-brand">
@@ -59,18 +65,20 @@ export function Credentials() {
         ))}
 
         <Panel tone="paper" className="overflow-hidden p-0 lg:col-span-4">
-          <Media
-            asset={IMAGES.safetyInspection}
-            ratio="4/3"
-            radius="none"
-            className="w-full"
-            sizes="(max-width: 1024px) 100vw, 33vw"
-          />
+          <ClipReveal from="left" ratio="4/3" className="w-full">
+            <Media
+              asset={IMAGES.safetyInspection}
+              ratio="auto"
+              radius="none"
+              className="h-full w-full"
+              sizes="(max-width: 1024px) 100vw, 33vw"
+            />
+          </ClipReveal>
           <p className="section-label p-7">Daily trip inspection</p>
         </Panel>
-      </div>
+      </Reveal>
 
-      <div className="mt-3">
+      <Reveal variant="cards" className="mt-3">
         <Panel tone="sunk" className="p-7 md:p-10">
           <p className="max-w-2xl text-[1.0625rem] leading-[1.6] text-ink-2">
             We are a trusted carrier in the Greater Toronto Area for
@@ -83,9 +91,9 @@ export function Credentials() {
             <TextLink href="/projects">The work</TextLink>
           </div>
         </Panel>
-      </div>
+      </Reveal>
 
-      <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <Reveal stagger variant="cards" className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         {[
           {
             icon: MapPin,
@@ -144,7 +152,7 @@ export function Credentials() {
             </Panel>
           );
         })}
-      </div>
+      </Reveal>
     </section>
   );
 }

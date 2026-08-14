@@ -4,6 +4,7 @@ import { INDUSTRIES } from "@/content/industries";
 import { INDUSTRY_IMAGE } from "@/content/imagery";
 import { Reveal } from "@/components/motion/reveal";
 import { HoverPreview } from "@/components/motion/hover-preview";
+import { SplitHeading } from "@/components/motion/split-heading";
 
 /**
  * Sectors.
@@ -39,9 +40,9 @@ export function Sectors() {
         <div className="mb-16 flex flex-col gap-8 md:mb-24 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="eyebrow mb-8">Sectors</p>
-            <h2 id="sectors-heading" className="type-h1 max-w-[12ch] text-ink">
+            <SplitHeading id="sectors-heading" className="type-h1 max-w-[12ch] text-ink">
               Who we run for.
-            </h2>
+            </SplitHeading>
           </div>
           <p className="max-w-sm text-ink-2 md:pb-2">
             Five sectors, each with its own documentation standard and its own

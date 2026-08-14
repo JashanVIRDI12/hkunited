@@ -4,21 +4,40 @@ import { FLEET_IMAGE } from "@/content/imagery";
 import { Media } from "@/components/ui/media";
 import { Panel, SectionLabel } from "@/components/ui/panel";
 import { TextLink } from "@/components/ui/button";
+import { PinnedTrack } from "@/components/motion/pinned-track";
+import { SplitHeading } from "@/components/motion/split-heading";
 
 /**
- * The fleet.
+ * The fleet, as the page's one PINNED HORIZONTAL PASS.
  *
- * Six cards, one per configuration, each a link into its entry in the
- * register on /fleet. The homepage's job here is recognition — a site
- * superintendent should spot the unit they need in the photograph and click
- * it — so the plate leads and the specification is reduced to the division
- * badge and the payload it is configured for.
+ * WHY THIS SECTION AND NO OTHER. A pinned track is the most expensive
+ * interaction on a site — it takes the scrollbar away and asks the visitor to
+ * trust that something is happening — so it has to be spent where the content
+ * is genuinely a set of parallel things rather than a sequence of arguments.
+ * Six equipment configurations is exactly that shape: they are peers, the
+ * order between them means nothing, and the thing a superintendent is doing
+ * here is COMPARING rather than reading. Sliding them past one at a time,
+ * with the one in focus bright and its neighbours recessed, is that comparison
+ * made physical.
  *
- * THE FULL SPREAD LIVES ON /fleet. This deliberately does not carry the
- * long description or the spec table: that page is the catalogue, and
- * duplicating it here would mean the homepage ends with six long reads.
+ * The alternative candidates were both wrong for it. The ten service lines are
+ * a directory — someone is looking for one specific entry, and a directory you
+ * have to scroll sideways through is a directory you have made worse. The
+ * five process steps are a sequence, and a sequence already has a natural
+ * vertical reading order that pinning would fight.
  *
- * Server component — the hover zoom is CSS on the card's `group`.
+ * IT IS ALSO THE ONLY ONE. A page with two pinned sections has neither: the
+ * second one reads as the site doing its trick again, and the first stops
+ * being an event.
+ *
+ * BELOW `lg` — AND UNDER REDUCED MOTION AT ANY SIZE — THERE IS NO PIN AND NO
+ * TRACK. The same six cards render as an ordinary grid, every one at full
+ * opacity, scrolled vertically like everything else on the page. That is not
+ * a degraded version of this section; for a thumb it is the better one.
+ *
+ * THE FULL SPREAD LIVES ON /fleet. This deliberately does not carry the long
+ * description or the spec table: that page is the catalogue, and duplicating
+ * it here would mean the homepage ends with six long reads.
  */
 const DIVISION_OF = Object.fromEntries(
   DIVISIONS.map((division) => [division.id, division.name]),
@@ -26,32 +45,77 @@ const DIVISION_OF = Object.fromEntries(
 
 export function Fleet() {
   return (
-    <section className="container-page band-y" aria-labelledby="fleet-heading">
-      <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-        <div>
-          <SectionLabel>Fleet</SectionLabel>
-          <h2 id="fleet-heading" className="type-h2 mt-6 max-w-[16ch] text-ink">
-            Six configurations, one operator
-          </h2>
+    <PinnedTrack
+      labelledBy="fleet-heading"
+      count={FLEET.length}
+      // `py-0` while pinned: `band-y` is several hundred pixels of padding,
+      // and a pinned viewport already sized to the screen cannot carry it
+      // without pushing its own cards past the fold.
+      className="container-page band-y data-[mode=pinned]:py-0"
+      trackClassName="sm:grid-cols-2 lg:grid-cols-3"
+      header={
+        <div className="mb-10 flex flex-col gap-6 md:mb-14 md:flex-row md:items-end md:justify-between">
+          <div>
+            <SectionLabel>Fleet</SectionLabel>
+            <SplitHeading
+              id="fleet-heading"
+              className="type-h2 mt-6 max-w-[16ch] text-ink"
+            >
+              Six configurations, one operator
+            </SplitHeading>
+          </div>
+          <div className="max-w-sm md:pb-2">
+            <p className="text-[0.9375rem] leading-relaxed text-ink-3">
+              Bulk, tank, waste and flatbed under a single roof — so the right
+              unit shows up, not the one that happened to be free.
+            </p>
+            {/*
+              The route onward lives in the header rather than under the
+              track. While pinned there is no "under the track" — the section
+              is the screen — and a link that only appears once the horizontal
+              pass is finished is a link most visitors never reach.
+            */}
+            <TextLink href="/fleet" className="mt-5">
+              Full fleet specifications
+            </TextLink>
+          </div>
         </div>
-        <p className="max-w-sm text-[0.9375rem] leading-relaxed text-ink-3 md:pb-2">
-          Bulk, tank, waste and flatbed under a single roof — so the right
-          unit shows up, not the one that happened to be free.
-        </p>
-      </div>
-
-      <div className="mt-10 grid gap-3 sm:grid-cols-2 md:mt-14 lg:grid-cols-3">
-        {FLEET.map((unit) => (
-          <Panel key={unit.slug} tone="paper" className="group overflow-hidden p-0">
+      }
+    >
+      {FLEET.map((unit) => (
+        /*
+          The data marker sits on a WRAPPER rather than on the Panel: `Panel`
+          takes an explicit prop list rather than spreading arbitrary
+          attributes, and widening it to pass one data attribute through would
+          make every card in the system a possible carrier of anything. The
+          wrapper is also the honest target for the active-state scale — it
+          holds no surface styling of its own, so scaling it cannot interact
+          with the card's border radius or shadow.
+        */
+        <div
+          key={unit.slug}
+          data-track-item
+          className="group-data-[mode=pinned]/track:w-[min(24rem,62vw)] group-data-[mode=pinned]/track:shrink-0"
+        >
+          <Panel tone="paper" className="group h-full overflow-hidden p-0">
             <Link href={`/fleet#${unit.slug}`} className="block">
-              <Media
-                asset={FLEET_IMAGE[unit.slug]}
-                ratio="4/3"
-                radius="none"
-                className="w-full"
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                zoomOnHover
-              />
+              {/*
+                `data-track-media` is the brightness target. The recessed cards
+                are dimmed and slightly desaturated rather than only faded — a
+                photograph at reduced opacity over a white card washes out to
+                grey, where a darkened one still reads as a photograph you have
+                not got to yet.
+              */}
+              <div data-track-media>
+                <Media
+                  asset={FLEET_IMAGE[unit.slug]}
+                  ratio="4/3"
+                  radius="none"
+                  className="w-full"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 24rem"
+                  zoomOnHover
+                />
+              </div>
 
               <div className="p-7">
                 <div className="flex items-baseline gap-4">
@@ -63,7 +127,35 @@ export function Fleet() {
                   </span>
                 </div>
 
-                <h3 className="type-h3 mt-4 text-ink transition-colors duration-500 group-hover:text-brand">
+                {/*
+                  The accent indicator. It expands under the heading of the
+                  card in focus and is the only brand mark in the track — which
+                  is what lets it carry the state on its own, without a border
+                  or a shadow being added to say the same thing twice.
+
+                  Parked at `scale-x-0` in the markup, which is safe here in a
+                  way it is not for content: this is an `aria-hidden`
+                  decoration with no information in it, so a build where it
+                  never expands loses nothing a reader needed.
+                */}
+                <span
+                  aria-hidden="true"
+                  data-track-rule
+                  className="mt-4 block h-px w-14 origin-left scale-x-0 bg-brand"
+                />
+
+                {/*
+                  `transition-colors` only, and the transform left alone.
+                  This heading is also the active-state target the track
+                  tweens `y` on — a CSS transition on `transform` here would
+                  run its own clock against GSAP's and the title would lag
+                  the card it belongs to. The hover lift is applied to the
+                  same axis by the wrapper below instead.
+                */}
+                <h3
+                  data-track-title
+                  className="type-h3 mt-4 text-ink transition-colors duration-[320ms] group-hover:text-brand"
+                >
                   {unit.name}
                 </h3>
                 <p className="mt-3 max-w-[32ch] text-[0.9375rem] leading-relaxed text-ink-3">
@@ -83,12 +175,8 @@ export function Fleet() {
               </div>
             </Link>
           </Panel>
-        ))}
-      </div>
-
-      <div className="mt-10">
-        <TextLink href="/fleet">Full fleet specifications</TextLink>
-      </div>
-    </section>
+        </div>
+      ))}
+    </PinnedTrack>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Menu, X } from "lucide-react";
@@ -9,6 +9,15 @@ import { COMPANY } from "@/content/company";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Wordmark } from "@/components/layout/wordmark";
+import {
+  gsap,
+  registerGsap,
+  prefersReducedMotion,
+  onPageEntrance,
+  EASE,
+  DUR,
+  STAGGER,
+} from "@/lib/motion";
 
 /**
  * Site header.
@@ -24,9 +33,64 @@ export function SiteHeader() {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const bar = useRef<HTMLElement>(null);
 
   // Only the homepage has a photographic hero behind the header.
   const overHero = pathname === "/" && !scrolled && !open;
+
+  /*
+   * The header arrives first, and it arrives by DROPPING IN — which is the
+   * one entrance that reads as furniture being set rather than as content
+   * appearing. Its marks then settle a beat behind the bar itself, so the
+   * nav is legible as a row before it is legible as links.
+   *
+   * `gsap.from()`, NOT a parked start state. `from()` reads the element's
+   * real resting position as its end point and borrows it backwards, so the
+   * header's final state is whatever the stylesheet already says it is. If
+   * this effect never runs — a failed chunk, a thrown error upstream, a
+   * browser that never fires the curtain's completion event — the header is
+   * simply where it belongs. Parking a FIXED, z-50 navigation bar off-screen
+   * and depending on a tween to bring it back would put the site's primary
+   * navigation one bug away from being unreachable.
+   *
+   * Mounted in the root layout, so this runs once per session rather than
+   * once per route change: a header that re-drops on every navigation is a
+   * tax on someone reading four pages.
+   */
+  useEffect(() => {
+    const el = bar.current;
+    if (!el) return;
+
+    registerGsap();
+    if (prefersReducedMotion()) return;
+
+    const marks = el.querySelectorAll<HTMLElement>("[data-mark]");
+    const ctx = gsap.context(() => {}, el);
+
+    const play = () =>
+      ctx.add(() => {
+        gsap
+          .timeline({ defaults: { ease: EASE.out } })
+          .from(el, {
+            yPercent: -100,
+            opacity: 0,
+            duration: DUR.cinematic,
+            ease: EASE.cine,
+          })
+          .from(
+            marks,
+            { opacity: 0, y: -10, duration: DUR.reveal, stagger: STAGGER.meta },
+            0.25,
+          );
+      });
+
+    const cancel = onPageEntrance(play);
+
+    return () => {
+      cancel();
+      ctx.revert();
+    };
+  }, []);
 
   useEffect(() => {
     let last = false;
@@ -66,6 +130,7 @@ export function SiteHeader() {
       </a>
 
       <header
+        ref={bar}
         className={cn(
           "fixed inset-x-0 top-0 z-50 transition-[background-color,border-color] duration-700 ease-[var(--ease-brand)]",
           /*
@@ -88,6 +153,7 @@ export function SiteHeader() {
         >
           <Link
             href="/"
+            data-mark
             className="relative z-10 -m-2 p-2"
             aria-label={`${COMPANY.name} — home`}
           >
@@ -99,7 +165,7 @@ export function SiteHeader() {
             />
           </Link>
 
-          <nav aria-label="Primary" className="hidden lg:block">
+          <nav aria-label="Primary" data-mark className="hidden lg:block">
             <ul className="flex items-center gap-1">
               {PRIMARY_NAV.map((item) => {
                 const active =
@@ -134,7 +200,7 @@ export function SiteHeader() {
             </ul>
           </nav>
 
-          <div className="flex items-center gap-3">
+          <div data-mark className="flex items-center gap-3">
             <a
               href={`tel:${COMPANY.phoneHref}`}
               className={cn(

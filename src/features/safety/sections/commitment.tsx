@@ -24,10 +24,24 @@ export function Commitment() {
       <div className="container-edge">
         <div className="grid items-center gap-x-16 gap-y-12 lg:grid-cols-12">
           <div className="lg:col-span-5">
-            <ClipReveal from="bottom">
+            {/*
+              The portrait carries the site's standard image entrance: a
+              lateral wipe with the frame settling from a slight over-scale,
+              and a 6% drift against the scroll. It is a person rather than a
+              subject placed tight in frame, so the crop the drift costs is
+              affordable here.
+            */}
+            <ClipReveal
+              from="left"
+              parallax={6}
+              ratio="4/5"
+              className="rounded-plate"
+            >
               <Media
                 asset={IMAGES.driverPortrait}
-                ratio="4/5"
+                ratio="auto"
+                radius="none"
+                className="h-full w-full"
                 sizes="(max-width: 1024px) 100vw, 40vw"
               />
             </ClipReveal>

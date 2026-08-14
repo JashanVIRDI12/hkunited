@@ -5,6 +5,7 @@ import { TextLink } from "@/components/ui/button";
 import { Reveal } from "@/components/motion/reveal";
 import { TiltCard } from "@/components/motion/tilt-card";
 import { BoardRail } from "@/features/services/sections/board-rail";
+import { SplitHeading } from "@/components/motion/split-heading";
 
 /**
  * The line-up, built as a DISPATCH BOARD.
@@ -52,12 +53,12 @@ export function Board() {
       <div className="container-edge">
         <div className="mb-16 grid gap-y-8 md:mb-24 lg:grid-cols-12">
           <p className="eyebrow lg:col-span-3">The line-up</p>
-          <h2
+          <SplitHeading
             id="board-heading"
             className="type-h1 optical-flush max-w-[13ch] text-ink lg:col-span-6"
           >
             Ten ways we move your project.
-          </h2>
+          </SplitHeading>
           <p className="max-w-xs self-end text-[0.9375rem] leading-relaxed text-ink-3 lg:col-span-3">
             Most jobs use two or three of these at once. One dispatch desk
             sequences them so they do not collide on your site.

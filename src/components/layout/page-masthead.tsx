@@ -4,7 +4,6 @@ import { MaskLines } from "@/components/motion/mask-lines";
 import { Drift } from "@/components/motion/drift";
 import { Reveal } from "@/components/motion/reveal";
 import { ClipReveal } from "@/components/motion/clip-reveal";
-import { Parallax } from "@/components/motion/parallax";
 
 /**
  * Interior-page masthead.
@@ -124,20 +123,30 @@ export function PageMasthead({
 
       {plate && (
         /*
-          The ratio lives on the Parallax frame: the plate inside it is
-          absolutely positioned and so cannot give the frame a height.
+          The ratio lives on the ClipReveal frame: under parallax the plate
+          inside it is absolutely positioned and so cannot give the frame a
+          height of its own.
+
+          One component now carries the wipe, the settle and the drift — they
+          used to be two nested wrappers, which meant two elements each
+          holding a transform and a documented note about not letting them
+          collide. See `motion/clip-reveal.tsx`.
         */
-        <ClipReveal from="bottom" duration={1.4} className="mt-20 md:mt-28">
-          <Parallax ratio="21/9" amount={8} className="w-full">
-            <Media
-              asset={plate}
-              ratio="auto"
-              radius="none"
-              className="h-full w-full"
-              sizes="100vw"
-              priority
-            />
-          </Parallax>
+        <ClipReveal
+          from="left"
+          duration={1.4}
+          parallax={8}
+          ratio="21/9"
+          className="mt-20 w-full md:mt-28"
+        >
+          <Media
+            asset={plate}
+            ratio="auto"
+            radius="none"
+            className="h-full w-full"
+            sizes="100vw"
+            priority
+          />
         </ClipReveal>
       )}
     </section>

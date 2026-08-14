@@ -12,6 +12,15 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    /*
+      Installed agent skills. Third-party tooling, not project source: their
+      `.cjs` helper scripts legitimately use `require()`, which this config
+      forbids, and linting them buried the project's own output under
+      seventeen errors nobody could act on. Not ours to fix and not shipped
+      to the browser.
+    */
+    ".claude/**",
+    ".agents/**",
   ]),
 ]);
 

@@ -2,6 +2,7 @@ import { Plus } from "lucide-react";
 import { FAQ } from "@/content/site";
 import { TextLink } from "@/components/ui/button";
 import { Reveal } from "@/components/motion/reveal";
+import { SplitHeading } from "@/components/motion/split-heading";
 
 /**
  * Questions.
@@ -25,9 +26,9 @@ export function Faq() {
           <div className="lg:col-span-4">
             <div className="lg:sticky lg:top-32">
               <p className="eyebrow mb-8">Questions</p>
-              <h2 id="faq-heading" className="type-h1 max-w-[10ch] text-ink">
+              <SplitHeading id="faq-heading" className="type-h1 max-w-[10ch] text-ink">
                 Asked before.
-              </h2>
+              </SplitHeading>
               <p className="mt-8 max-w-sm leading-relaxed text-ink-2">
                 If the answer you need is not here, dispatch will have it —
                 and would rather you asked than guessed.

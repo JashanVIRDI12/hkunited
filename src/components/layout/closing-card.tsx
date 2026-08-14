@@ -1,6 +1,7 @@
 import { Phone, Mail } from "lucide-react";
 import { COMPANY } from "@/content/company";
 import { Button } from "@/components/ui/button";
+import { Reveal } from "@/components/motion/reveal";
 
 /**
  * Closing card.
@@ -36,7 +37,11 @@ export function ClosingCard({
 }: ClosingCardProps) {
   return (
     <section className="container-page pb-3 pt-4 md:pt-6" aria-labelledby={headingId}>
-      <div>
+      {/*
+        The one surface Royal Blue fills, so it arrives as a card rather than
+        fading in as a colour — the settle is what makes the accent land.
+      */}
+      <Reveal variant="cards">
         <div className="rounded-plate bg-brand p-7 md:p-12 lg:p-16">
           <div className="grid gap-10 lg:grid-cols-12 lg:items-end lg:gap-12">
             <div className="lg:col-span-7">
@@ -92,7 +97,7 @@ export function ClosingCard({
             </div>
           </div>
         </div>
-      </div>
+      </Reveal>
     </section>
   );
 }

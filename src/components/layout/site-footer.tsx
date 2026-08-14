@@ -2,6 +2,7 @@ import Link from "next/link";
 import { COMPANY, AFFILIATIONS } from "@/content/company";
 import { FOOTER_NAV } from "@/content/site";
 import { Wordmark } from "@/components/layout/wordmark";
+import { Reveal } from "@/components/motion/reveal";
 
 /**
  * Footer. Server component — no interactivity, so it ships no JS.
@@ -14,7 +15,12 @@ export function SiteFooter() {
   return (
     <footer className="border-t border-line bg-paper">
       <div className="container-edge pb-10 pt-24 md:pt-32">
-        <div className="grid gap-14 lg:grid-cols-[1.5fr_1fr_1fr_1.2fr]">
+        {/*
+          The footer columns arrive as content rather than as cards — they
+          are lists of links on an open surface, with no card edge for a
+          settle scale to belong to.
+        */}
+        <Reveal stagger className="grid gap-14 lg:grid-cols-[1.5fr_1fr_1fr_1.2fr]">
           <div>
             <p className="eyebrow mb-6">{COMPANY.serviceArea}</p>
             <p className="max-w-xs text-lg leading-snug tracking-tight text-ink">
@@ -69,7 +75,7 @@ export function SiteFooter() {
               </a>
             </address>
           </div>
-        </div>
+        </Reveal>
 
         {/* Closing wordmark */}
         <div className="mt-24 md:mt-32" aria-hidden="true">

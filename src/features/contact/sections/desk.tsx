@@ -4,6 +4,7 @@ import { IMAGES } from "@/content/imagery";
 import { Media } from "@/components/ui/media";
 import { TextLink } from "@/components/ui/button";
 import { Reveal } from "@/components/motion/reveal";
+import { SplitHeading } from "@/components/motion/split-heading";
 
 /**
  * The desk and the terminal.
@@ -42,12 +43,12 @@ export function Desk() {
       <div className="container-edge">
         <div className="mb-14 grid gap-y-8 md:mb-20 lg:grid-cols-12">
           <p className="eyebrow lg:col-span-3">Direct</p>
-          <h2
+          <SplitHeading
             id="desk-heading"
             className="type-h1 optical-flush max-w-[13ch] text-ink lg:col-span-6"
           >
             Dispatch answers the phone.
-          </h2>
+          </SplitHeading>
           <p className="max-w-xs self-end text-[0.9375rem] leading-relaxed text-ink-3 lg:col-span-3">
             Around the clock for active jobs. Quotes and new enquiries are
             answered during business hours.

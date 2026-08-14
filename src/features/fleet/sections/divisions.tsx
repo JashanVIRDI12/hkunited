@@ -1,5 +1,7 @@
 import { FLEET, DIVISIONS } from "@/content/fleet";
 import { Panel, SectionLabel } from "@/components/ui/panel";
+import { SplitHeading } from "@/components/motion/split-heading";
+import { Reveal } from "@/components/motion/reveal";
 
 /**
  * The four divisions, as a contents page for the register below.
@@ -20,9 +22,9 @@ export function Divisions() {
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
             <SectionLabel>Divisions</SectionLabel>
-            <h2 id="divisions-heading" className="type-h2 mt-6 max-w-[16ch] text-ink">
+            <SplitHeading id="divisions-heading" className="type-h2 mt-6 max-w-[16ch] text-ink">
               Four divisions, one dispatch desk
-            </h2>
+            </SplitHeading>
           </div>
           <p className="max-w-sm text-[0.9375rem] leading-relaxed text-ink-3 md:pb-2">
             A job that needs three of them is still one phone call and one
@@ -30,7 +32,11 @@ export function Divisions() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-3 sm:grid-cols-2 md:mt-14 lg:grid-cols-4">
+        <Reveal
+          stagger
+          variant="cards"
+          className="mt-10 grid gap-3 sm:grid-cols-2 md:mt-14 lg:grid-cols-4"
+        >
           {DIVISIONS.map((division) => {
             const units = FLEET.filter((unit) => unit.category === division.id);
 
@@ -62,7 +68,7 @@ export function Divisions() {
               </Panel>
             );
           })}
-        </div>
+        </Reveal>
       </div>
     </section>
   );

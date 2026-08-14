@@ -1,5 +1,7 @@
 import { INDUSTRIES } from "@/content/industries";
 import { Marquee } from "@/components/motion/marquee";
+import { SplitHeading } from "@/components/motion/split-heading";
+import { SectionTransition } from "@/components/motion/section-transition";
 
 /**
  * What we move.
@@ -38,22 +40,36 @@ const MATERIALS = Array.from(
   new Set(INDUSTRIES.flatMap((industry) => industry.materials)),
 );
 
+/*
+ * The page's one dark band gets the site's section dissolve, the same
+ * instrument the homepage safety band uses: the surface darkens into the dark
+ * as it arrives, the copy resolves once it is dark enough to hold white type,
+ * and on the way out the typography leaves upward before the surface lightens
+ * back to paper. Either side of this is a long light read, so without it the
+ * band is two hard horizontal cuts.
+ */
 export function Materials() {
   return (
-    <section
+    <SectionTransition
       className="overflow-hidden bg-ink py-20 md:py-28"
-      aria-labelledby="materials-heading"
+      labelledBy="materials-heading"
     >
       <div className="container-edge">
         <div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
           <div>
             <p className="eyebrow text-white/45">What we move</p>
-            <h2
+            <SplitHeading
               id="materials-heading"
               className="type-h2 mt-6 max-w-[16ch] text-white"
             >
-              {MATERIALS.length} material streams, one dispatch desk.
-            </h2>
+              {/*
+                One interpolated string, not a number beside a text node.
+                `SplitHeading` measures real line boxes and needs the whole
+                heading as a single string — two sibling nodes would be split
+                independently and the count would get its own line box.
+              */}
+              {`${MATERIALS.length} material streams, one dispatch desk.`}
+            </SplitHeading>
           </div>
           <p className="max-w-sm text-[0.9375rem] leading-relaxed text-white/60 md:pb-2">
             Each stream carries its own handling rule, its own paperwork and
@@ -88,6 +104,6 @@ export function Materials() {
           ))}
         </ul>
       </Marquee>
-    </section>
+    </SectionTransition>
   );
 }

@@ -1,36 +1,42 @@
-import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
 import { SERVICES } from "@/content/services";
 import { SERVICE_IMAGE } from "@/content/imagery";
-import { Media } from "@/components/ui/media";
 import { SectionLabel } from "@/components/ui/panel";
 import { TextLink } from "@/components/ui/button";
+import { Reveal } from "@/components/motion/reveal";
+import { SplitHeading } from "@/components/motion/split-heading";
+import { ServiceAccordion } from "@/features/home/sections/service-accordion";
 
 /**
  * Services.
  *
- * A DIRECTORY, NOT A CARD GRID. Ten services as tall photo cards ran four
- * rows deep and cost roughly two full screens of scrolling — on a homepage,
- * where this block's only job is to say what we do and route you onward.
- * Worse, it was the third card grid on the page: services, fleet and
- * sectors all read as the same object, so the eye stopped distinguishing
- * them and the page felt like one long list of tiles.
+ * AN ACCORDION OF PHOTOGRAPHS, NOT A GRID OF CARDS. Ten panels standing side
+ * by side as one band; the one under the pointer opens to a third of the
+ * frame and the other nine hold as narrow slices carrying a vertical label.
+ * `service-accordion.tsx` carries the full argument for the form and the
+ * transform arithmetic that makes it cheap.
  *
- * Compact rows in two columns fix all of that. Every one of the ten is
- * visible at once instead of four-at-a-time, the block occupies about a
- * third of the height, and a row is a visibly different object from the
- * cards above and below it.
+ * WHAT THIS REPLACED, AND WHY. The previous build was ten rows in two
+ * columns with an 80px thumbnail on each. Three things were wrong with it:
+ * an 80px photograph is not a photograph, it read as the third grid on a
+ * page that already had two, and a numbered list that runs 01–05 down the
+ * left then restarts at 06 on the right makes the reader re-find their place
+ * halfway through. The accordion answers all three — every service is a
+ * full-height photograph, the band is a shape that appears nowhere else on
+ * the site, and the numbering runs straight across in one direction.
  *
- * WHY THE THUMBNAIL SURVIVED THE SHRINK. At 80px a photograph stops being
- * an image you look at and becomes a mark you recognise — which is the
- * actual job here, since a superintendent scanning for "the tanker one"
- * finds it by silhouette faster than by reading ten headings. Ten distinct
- * frames, one per row, from `SERVICE_IMAGE`.
+ * IT ALSO FITS. Ten services in roughly one screen, against the two screens
+ * the original card grid cost and the thousand pixels a single-column ledger
+ * would. On a homepage that is not a detail — this block's job is to say
+ * what we do and route onward, and it now does it without asking for the
+ * scroll budget of a section that makes an argument.
  *
- * The rows are a `<ul>`: this is a list of links, and announcing it as
- * "list, 10 items" is free navigation for a screen reader.
+ * THE BAND IS `paper-alt`, unchanged. This section sits between two white
+ * ones, and with the accordion's own frame being a single dark rectangle the
+ * surface change is what keeps that rectangle from reading as a hole punched
+ * in the page.
  *
- * Server component — the hover state is CSS on each row's `group`.
+ * Server component. The accordion is the only island and holds no content of
+ * its own — every panel is server-rendered markup passed into it.
  */
 export function Services() {
   return (
@@ -39,58 +45,34 @@ export function Services() {
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
             <SectionLabel>Services</SectionLabel>
-            <h2 id="services-heading" className="type-h2 mt-6 max-w-[16ch] text-ink">
+            <SplitHeading
+              id="services-heading"
+              className="type-h2 mt-6 max-w-[16ch] text-ink"
+            >
               Ten ways we move your project
-            </h2>
+            </SplitHeading>
           </div>
-          <p className="max-w-sm text-[0.9375rem] leading-relaxed text-ink-3 md:pb-2">
-            Most jobs use two or three at once. One dispatch desk sequences
-            them so they do not collide on your site.
-          </p>
+          <Reveal delay={0.15}>
+            <p className="max-w-sm text-[0.9375rem] leading-relaxed text-ink-3 md:pb-2">
+              Most jobs use two or three at once. One dispatch desk sequences
+              them so they do not collide on your site.
+            </p>
+          </Reveal>
         </div>
 
-        <ul className="mt-10 grid gap-3 md:mt-14 lg:grid-cols-2">
-          {SERVICES.map((service) => (
-            <li key={service.slug}>
-              <Link
-                href={`/services#${service.slug}`}
-                className="group flex h-full items-center gap-5 rounded-plate border border-line bg-paper p-4 transition-colors duration-500 hover:border-line-strong hover:bg-paper-alt"
-              >
-                <Media
-                  asset={SERVICE_IMAGE[service.slug]}
-                  ratio="1/1"
-                  radius="soft"
-                  className="w-20 shrink-0"
-                  sizes="80px"
-                  zoomOnHover
-                />
+        <ServiceAccordion
+          items={SERVICES.map((service) => ({
+            slug: service.slug,
+            index: service.index,
+            name: service.name,
+            summary: service.summary,
+            plate: SERVICE_IMAGE[service.slug],
+          }))}
+        />
 
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-baseline gap-3">
-                    <span className="tnum text-[0.6875rem] tracking-[0.16em] text-ink-4">
-                      {service.index}
-                    </span>
-                    <h3 className="text-[1.0625rem] font-medium leading-snug tracking-tight text-ink transition-colors duration-500 group-hover:text-brand">
-                      {service.name}
-                    </h3>
-                  </div>
-                  <p className="mt-1.5 text-[0.875rem] leading-relaxed text-ink-3">
-                    {service.summary}
-                  </p>
-                </div>
-
-                <ArrowUpRight
-                  className="size-5 shrink-0 text-ink-4 transition-all duration-500 ease-[var(--ease-brand)] group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-brand"
-                  aria-hidden="true"
-                />
-              </Link>
-            </li>
-          ))}
-        </ul>
-
-        <div className="mt-10">
+        <Reveal className="mt-10">
           <TextLink href="/services">All ten service lines</TextLink>
-        </div>
+        </Reveal>
       </div>
     </section>
   );

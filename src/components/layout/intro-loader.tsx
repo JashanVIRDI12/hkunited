@@ -73,12 +73,12 @@ export function IntroLoader() {
         },
         "<",
       )
-      .to(markRef.current, { yPercent: 0, duration: 1, ease: EASE }, "-=0.35")
+      .to(markRef.current, { yPercent: 0, duration: 1, ease: EASE.deep }, "-=0.35")
       .to({}, { duration: 0.35 })
       .to(el, {
         yPercent: -100,
         duration: 1.1,
-        ease: EASE,
+        ease: EASE.deep,
       });
 
     return () => {

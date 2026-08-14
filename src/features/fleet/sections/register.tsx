@@ -8,6 +8,9 @@ import { FLEET_IMAGE } from "@/content/imagery";
 import { Media } from "@/components/ui/media";
 import { Panel, SectionLabel } from "@/components/ui/panel";
 import { Button } from "@/components/ui/button";
+import { SplitHeading } from "@/components/motion/split-heading";
+import { Reveal } from "@/components/motion/reveal";
+import { ClipReveal } from "@/components/motion/clip-reveal";
 
 /**
  * The register.
@@ -45,9 +48,9 @@ export function Register() {
       <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
         <div>
           <SectionLabel>The register</SectionLabel>
-          <h2 id="register-heading" className="type-h2 mt-6 max-w-[16ch] text-ink">
+          <SplitHeading id="register-heading" className="type-h2 mt-6 max-w-[16ch] text-ink">
             Every unit, with its numbers
-          </h2>
+          </SplitHeading>
         </div>
         <p className="max-w-sm text-[0.9375rem] leading-relaxed text-ink-3 md:pb-2">
           Clearance, ground conditions and access decide the configuration as
@@ -56,11 +59,15 @@ export function Register() {
         </p>
       </div>
 
-      <div className="mt-10 flex flex-col gap-3 md:mt-14">
+      <Reveal
+        stagger
+        variant="cards"
+        className="mt-10 flex flex-col gap-3 md:mt-14"
+      >
         {FLEET.map((unit) => (
           <Entry key={unit.slug} unit={unit} />
         ))}
-      </div>
+      </Reveal>
     </section>
   );
 }
@@ -83,15 +90,22 @@ function Entry({ unit }: { unit: FleetUnit }) {
           it on the narrow breakpoint, where the grid collapses and there is
           no sibling to inherit height from.
         */}
-        <div className="lg:col-span-5">
-          <Media
-            asset={FLEET_IMAGE[unit.slug]}
-            ratio="auto"
-            radius="none"
-            className="h-full min-h-[15rem] w-full lg:min-h-[22rem]"
-            sizes="(max-width: 1024px) 100vw, 42vw"
-            zoomOnHover
-          />
+        <div className="relative min-h-[15rem] lg:col-span-5 lg:min-h-[22rem]">
+          {/*
+            The plate is absolutely filled inside a sized column so the clip
+            frame has a height to wipe across. ClipReveal sizes to its own
+            box, and a frame with no height wipes nothing at all.
+          */}
+          <ClipReveal from="left" className="absolute inset-0">
+            <Media
+              asset={FLEET_IMAGE[unit.slug]}
+              ratio="auto"
+              radius="none"
+              className="h-full w-full"
+              sizes="(max-width: 1024px) 100vw, 42vw"
+              zoomOnHover
+            />
+          </ClipReveal>
         </div>
 
         <div className="p-7 md:p-10 lg:col-span-7">

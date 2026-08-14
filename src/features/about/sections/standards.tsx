@@ -1,6 +1,7 @@
 import { SAFETY_PILLARS } from "@/content/safety";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/motion/reveal";
+import { SplitHeading } from "@/components/motion/split-heading";
 
 /**
  * Standards.
@@ -28,9 +29,9 @@ export function Standards() {
           <div className="lg:col-span-4">
             <div className="lg:sticky lg:top-28">
               <p className="section-label text-white/50">/ Standards</p>
-              <h2 id="standards-heading" className="type-h2 mt-6 max-w-[12ch] text-white">
+              <SplitHeading id="standards-heading" className="type-h2 mt-6 max-w-[12ch] text-white">
                 An unwavering commitment
-              </h2>
+              </SplitHeading>
               <p className="mt-7 max-w-sm text-[0.9375rem] leading-relaxed text-white/70">
                 Training, assessment, inspection and maintenance — four things
                 held continuously, because compliance that only appears when

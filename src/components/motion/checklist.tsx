@@ -72,7 +72,7 @@ export function Checklist({ items, tone = "light", className }: ChecklistProps) 
       strokeDashoffset: 0,
       duration: 0.45,
       stagger: 0.09,
-      ease: EASE,
+      ease: EASE.out,
       scrollTrigger: { trigger: el, start: START, once: true },
     });
 

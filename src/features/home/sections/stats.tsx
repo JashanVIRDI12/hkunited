@@ -2,43 +2,56 @@ import { COMPANY } from "@/content/company";
 import { FLEET, DIVISIONS } from "@/content/fleet";
 import { INDUSTRIES } from "@/content/industries";
 import { Panel } from "@/components/ui/panel";
+import { Counter } from "@/components/motion/counter";
 
 /**
  * The stat row.
  *
- * Four cards directly beneath the hero, before any argument is made. They
- * are the page's credentials — the reason to keep scrolling — so they get
- * the position where a visitor is still deciding, not a band two thirds
- * down where only committed readers arrive.
+ * Four cards directly beneath the hero, before any argument is made. They are
+ * the page's credentials — the reason to keep scrolling — so they get the
+ * position where a visitor is still deciding, not a band two thirds down
+ * where only committed readers arrive.
  *
- * NO MOTION AT ALL, AND THAT IS THE POINT. This row previously carried two
- * scroll-driven effects and each had the same failure mode. `Reveal` in
- * stagger mode has GSAP set every card to `opacity: 0` the moment it
- * initialises, and only a ScrollTrigger brings them back. `Counter` blanks
- * the numeral to "0" on mount and counts up on the same kind of trigger.
- * Both are betting that a trigger fires; when it does not — and on a row
- * that sits ON the fold, where the trigger's start point is ambiguous, it
- * often does not — the visitor is left with four empty cards or four zeros.
+ * THE NUMERALS COUNT UP, AND THE REST OF THE ROW DOES NOT MOVE AT ALL.
  *
- * A credential that is sometimes invisible is worse than one that never
- * animated. So this is now a plain server component: no client JavaScript,
- * nothing to park, nothing to restore.
+ * That split is the design. A row where the cards also fade and rise reads as
+ * a page still loading; a row where four numbers spin up inside four cards
+ * that were already there reads as instruments taking a reading, which is
+ * exactly what a credentials row is. The labels beside them stay completely
+ * still — they are the calm the numbers are measured against.
  *
- * STILL DELIBERATELY CONSERVATIVE. Every figure is either published on
- * hkunited.ca (years in operation) or derived by counting the content model
- * (configurations, divisions, sectors). Fleet unit counts, project totals
- * and client counts are NOT shown — the source site does not substantiate
- * them. See `PENDING_VERIFICATION` in `content/company.ts`; when the client
- * confirms real numbers, this row is where they belong.
+ * THIS ROW CARRIED NO MOTION FOR A REASON, AND THE REASON IS NOW FIXED
+ * RATHER THAN OVERRULED. Both effects it previously ran had the same failure:
+ * each hid something unconditionally on mount — cards to `opacity: 0`, numerals
+ * to "0" — and depended on a ScrollTrigger to bring it back. On a row sitting
+ * ON the fold, where the start point is ambiguous and Lenis has not yet
+ * reported a position, that trigger does not always fire, and the visitor gets
+ * four empty cards or four zeros. The row was stripped to a plain server
+ * component as the fix.
+ *
+ * `Counter` no longer works that way. `immediateRender: false` means it does
+ * not write to the DOM at all until its tween actually runs, so the figure on
+ * screen is the server-rendered final value until the instant something is
+ * going to animate it — and if nothing ever does, the number is simply right.
+ * The effect became safe to reinstate by making its failure identical to its
+ * success. The cards themselves are still deliberately motionless.
+ *
+ * STILL DELIBERATELY CONSERVATIVE ABOUT THE FIGURES. Every one is either
+ * published on hkunited.ca (years in operation) or derived by counting the
+ * content model (configurations, divisions, sectors). Fleet unit counts,
+ * project totals and client counts are NOT shown — the source site does not
+ * substantiate them. See `PENDING_VERIFICATION` in `content/company.ts`; when
+ * the client confirms real numbers, this row is where they belong.
  */
 const STATS = [
   {
-    value: `${COMPANY.yearsInOperation}+`,
+    value: COMPANY.yearsInOperation,
+    suffix: "+",
     label: "Years moving Ontario freight",
   },
-  { value: String(FLEET.length), label: "Equipment configurations" },
-  { value: String(DIVISIONS.length), label: "Operating divisions" },
-  { value: String(INDUSTRIES.length), label: "Sectors served" },
+  { value: FLEET.length, suffix: "", label: "Equipment configurations" },
+  { value: DIVISIONS.length, suffix: "", label: "Operating divisions" },
+  { value: INDUSTRIES.length, suffix: "", label: "Sectors served" },
 ];
 
 export function Stats() {
@@ -62,7 +75,12 @@ export function Stats() {
               out-weigh a 13px label, and at 2.25rem it already does.
             */}
             <p className="tnum shrink-0 font-display text-[clamp(1.75rem,2.4vw,2.25rem)] leading-none tracking-[-0.014em] text-ink">
-              {stat.value}
+              {/*
+                `tnum` on the wrapper is what stops the count from jittering:
+                proportional numerals change width as they roll, so the label
+                beside them would shuffle sideways on every frame.
+              */}
+              <Counter value={stat.value} suffix={stat.suffix} />
             </p>
             <span className="h-8 w-px shrink-0 bg-line-strong" aria-hidden="true" />
             <p className="max-w-[15ch] text-[0.8125rem] leading-snug text-ink-3">

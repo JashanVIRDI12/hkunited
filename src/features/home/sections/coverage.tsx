@@ -3,6 +3,8 @@ import { COMPANY } from "@/content/company";
 import { FLEET } from "@/content/fleet";
 import { Panel, IconBadge } from "@/components/ui/panel";
 import { Button } from "@/components/ui/button";
+import { Reveal } from "@/components/motion/reveal";
+import { SplitHeading } from "@/components/motion/split-heading";
 
 /**
  * Coverage and terms.
@@ -29,13 +31,16 @@ const MATERIALS = [...new Set(FLEET.flatMap((unit) => unit.payloads))].sort(
 export function Coverage() {
   return (
     <section className="container-page band-y" aria-labelledby="coverage-heading">
-      <div>
+      <Reveal variant="cards">
         <Panel tone="sunk" className="p-7 md:p-10 lg:p-12">
           <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
             <div className="lg:col-span-7">
-              <h2 id="coverage-heading" className="type-h2 max-w-[15ch] text-ink">
+              <SplitHeading
+                id="coverage-heading"
+                className="type-h2 max-w-[15ch] text-ink"
+              >
                 One terminal, one province
-              </h2>
+              </SplitHeading>
 
               {/* The route. A drawn line, because a comma does not read as distance. */}
               <div className="mt-10 max-w-md">
@@ -93,7 +98,7 @@ export function Coverage() {
             </div>
           </div>
         </Panel>
-      </div>
+      </Reveal>
     </section>
   );
 }

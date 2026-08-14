@@ -3,6 +3,8 @@ import { FAQ } from "@/content/site";
 import { COMPANY } from "@/content/company";
 import { SectionLabel } from "@/components/ui/panel";
 import { TextLink } from "@/components/ui/button";
+import { SplitHeading } from "@/components/motion/split-heading";
+import { Reveal } from "@/components/motion/reveal";
 
 /**
  * Questions.
@@ -25,9 +27,9 @@ export function Faq() {
         <div className="lg:col-span-4">
           <div className="lg:sticky lg:top-28">
             <SectionLabel>FAQ</SectionLabel>
-            <h2 id="faq-heading" className="type-h2 mt-6 max-w-[12ch] text-ink">
+            <SplitHeading id="faq-heading" className="type-h2 mt-6 max-w-[12ch] text-ink">
               Asked before
-            </h2>
+            </SplitHeading>
             <p className="mt-7 max-w-sm text-[0.9375rem] leading-relaxed text-ink-3">
               If the answer you need is not here, dispatch will have it — and
               would rather you asked than guessed.
@@ -44,7 +46,12 @@ export function Faq() {
           </div>
         </div>
 
-        <div className="border-t border-line lg:col-span-7 lg:col-start-6">
+        {/*
+          The questions stagger in as a group, as content rather than as
+          cards: these are rows of type on a hairline grid, and a settle
+          scale on a row with no surface of its own reads as text zooming.
+        */}
+        <Reveal stagger className="border-t border-line lg:col-span-7 lg:col-start-6">
           {FAQ.map((item) => (
             <details key={item.q} className="group border-b border-line">
               <summary className="flex cursor-pointer list-none items-start justify-between gap-8 py-6 [&::-webkit-details-marker]:hidden">
@@ -59,7 +66,7 @@ export function Faq() {
               <p className="max-w-[62ch] pb-7 leading-[1.75] text-ink-2">{item.a}</p>
             </details>
           ))}
-        </div>
+        </Reveal>
       </div>
     </section>
   );

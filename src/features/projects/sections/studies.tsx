@@ -4,6 +4,8 @@ import { getFleetUnit } from "@/content/fleet";
 import { IMAGES, type ImageAsset } from "@/content/imagery";
 import { Media } from "@/components/ui/media";
 import { StackCard } from "@/components/motion/stack-card";
+import { SplitHeading } from "@/components/motion/split-heading";
+import { ClipReveal } from "@/components/motion/clip-reveal";
 
 /**
  * Capability studies, built as a STACKING DECK.
@@ -61,12 +63,12 @@ export function Studies() {
       <div className="container-edge">
         <div className="mb-16 grid gap-y-8 md:mb-20 lg:grid-cols-12">
           <p className="eyebrow lg:col-span-3">The work</p>
-          <h2
+          <SplitHeading
             id="studies-heading"
             className="type-h1 optical-flush max-w-[14ch] text-ink lg:col-span-6"
           >
             Three jobs that do not forgive a late load.
-          </h2>
+          </SplitHeading>
           <p className="max-w-xs self-end text-[0.9375rem] leading-relaxed text-ink-3 lg:col-span-3">
             Each of these is a class of work we run continuously across the
             Greater Toronto Area, not a single contract.
@@ -118,13 +120,15 @@ function Study({ study }: { study: CaseStudy }) {
     >
       <div className="grid lg:grid-cols-12">
         <div className="relative min-h-[15rem] lg:col-span-5 lg:min-h-full">
-          <Media
-            asset={STUDY_IMAGE[study.slug]}
-            ratio="auto"
-            radius="none"
-            className="absolute inset-0 h-full w-full"
-            sizes="(min-width: 1024px) 42vw, 100vw"
-          />
+          <ClipReveal from="left" className="absolute inset-0">
+            <Media
+              asset={STUDY_IMAGE[study.slug]}
+              ratio="auto"
+              radius="none"
+              className="h-full w-full"
+              sizes="(min-width: 1024px) 42vw, 100vw"
+            />
+          </ClipReveal>
         </div>
 
         <div className="p-7 md:p-10 lg:col-span-7 lg:p-12">

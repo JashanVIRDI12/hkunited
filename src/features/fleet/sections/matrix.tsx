@@ -1,5 +1,7 @@
 import { FLEET } from "@/content/fleet";
 import { Panel, SectionLabel } from "@/components/ui/panel";
+import { SplitHeading } from "@/components/motion/split-heading";
+import { Reveal } from "@/components/motion/reveal";
 
 /**
  * Payload matrix.
@@ -34,9 +36,9 @@ export function Matrix() {
         <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
           <div>
             <SectionLabel>What carries what</SectionLabel>
-            <h2 id="matrix-heading" className="type-h2 mt-6 max-w-[16ch] text-ink">
+            <SplitHeading id="matrix-heading" className="type-h2 mt-6 max-w-[16ch] text-ink">
               Match the material to the unit
-            </h2>
+            </SplitHeading>
           </div>
           <p className="max-w-sm text-[0.9375rem] leading-relaxed text-ink-3 md:pb-2">
             If your material is not listed it almost certainly still travels
@@ -44,7 +46,8 @@ export function Matrix() {
           </p>
         </div>
 
-        <Panel tone="paper" className="mt-10 overflow-hidden p-0 md:mt-14">
+        <Reveal variant="cards" className="mt-10 md:mt-14">
+          <Panel tone="paper" className="overflow-hidden p-0">
           <div className="hide-scrollbar overflow-x-auto">
             <table className="w-full min-w-[48rem] border-collapse text-left">
               <caption className="sr-only">
@@ -108,7 +111,8 @@ export function Matrix() {
               </tbody>
             </table>
           </div>
-        </Panel>
+          </Panel>
+        </Reveal>
 
         <p className="mt-6 max-w-2xl text-[0.9375rem] leading-relaxed text-ink-3">
           We are a trusted carrier in the Greater Toronto Area for contaminated

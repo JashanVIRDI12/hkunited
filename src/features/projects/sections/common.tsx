@@ -1,5 +1,6 @@
 import { Reveal } from "@/components/motion/reveal";
 import { TextLink } from "@/components/ui/button";
+import { SplitHeading } from "@/components/motion/split-heading";
 
 /**
  * What the three studies share.
@@ -37,9 +38,9 @@ export function Common() {
           <div className="lg:col-span-4">
             <div className="lg:sticky lg:top-32">
               <p className="eyebrow mb-8">The pattern</p>
-              <h2 id="common-heading" className="type-h1 max-w-[11ch] text-ink">
+              <SplitHeading id="common-heading" className="type-h1 max-w-[11ch] text-ink">
                 What all three have in common.
-              </h2>
+              </SplitHeading>
               <p className="mt-8 max-w-sm leading-relaxed text-ink-2">
                 Different sites, one discipline. It is why the same carrier
                 runs a condominium dig, a transit corridor and a highway

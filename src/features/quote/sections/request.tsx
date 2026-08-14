@@ -2,6 +2,7 @@ import { PROCESS } from "@/content/process";
 import { COMPANY } from "@/content/company";
 import { EnquiryForm } from "@/features/enquiry/form";
 import { Reveal } from "@/components/motion/reveal";
+import { SplitHeading } from "@/components/motion/split-heading";
 
 /**
  * The request.
@@ -27,9 +28,9 @@ export function Request() {
         <div className="grid gap-x-16 gap-y-16 lg:grid-cols-12">
           <div className="lg:col-span-7">
             <p className="eyebrow mb-8">The request</p>
-            <h2 id="request-heading" className="type-h1 max-w-[13ch] text-ink">
+            <SplitHeading id="request-heading" className="type-h1 max-w-[13ch] text-ink">
               Four things and we can price it.
-            </h2>
+            </SplitHeading>
             <p className="mt-8 max-w-[46ch] text-[1.0625rem] leading-[1.75] text-ink-2">
               Material, volume, site and schedule. Everything else — the unit,
               the sequence, the documentation — is ours to work out, and the

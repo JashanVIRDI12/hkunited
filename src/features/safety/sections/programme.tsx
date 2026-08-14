@@ -1,6 +1,7 @@
 import { SAFETY_PILLARS, type SafetyPillar } from "@/content/safety";
 import { Reveal } from "@/components/motion/reveal";
 import { Checklist } from "@/components/motion/checklist";
+import { SplitHeading } from "@/components/motion/split-heading";
 
 /**
  * The programme, in full.
@@ -40,12 +41,12 @@ export function Programme() {
       <div className="container-edge">
         <div className="mb-16 grid gap-y-8 md:mb-20 lg:grid-cols-12">
           <p className="eyebrow lg:col-span-3">The programme</p>
-          <h2
+          <SplitHeading
             id="programme-heading"
             className="type-h1 optical-flush max-w-[15ch] text-ink lg:col-span-6"
           >
             Four pillars, held continuously.
-          </h2>
+          </SplitHeading>
           <p className="max-w-xs self-end text-[0.9375rem] leading-relaxed text-ink-3 lg:col-span-3">
             Training that surpasses the industry standard, assessment before
             mobilisation, audit without warning, and maintenance that never
