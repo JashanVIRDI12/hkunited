@@ -57,6 +57,11 @@ export function Fleet() {
         <div className="mb-10 flex flex-col gap-6 md:mb-14 md:flex-row md:items-end md:justify-between">
           <div>
             <SectionLabel>Fleet</SectionLabel>
+            {/*
+              No `autoSplit` to disable any more: headings are split once,
+              after the fonts land, and the split is torn down the moment the
+              reveal completes. Nothing observes this pinned container.
+            */}
             <SplitHeading
               id="fleet-heading"
               className="type-h2 mt-6 max-w-[16ch] text-ink"

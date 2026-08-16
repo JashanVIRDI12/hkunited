@@ -10,6 +10,8 @@ import {
   registerGsap,
   motionMedia,
   inViewport,
+  hasEntered,
+  markEntered,
   EASE,
   DUR,
 } from "@/lib/motion";
@@ -156,7 +158,7 @@ export function ServiceAccordion({ items }: { items: readonly AccordionItem[] })
        */
       let entry: gsap.core.Tween | null = null;
 
-      if (!c.reduced) {
+      if (!c.reduced && !hasEntered(el)) {
         entry = isRail
           ? gsap.fromTo(
               el,
@@ -168,6 +170,7 @@ export function ServiceAccordion({ items }: { items: readonly AccordionItem[] })
                 clipPath: "inset(0% 0% 0% 0% round 1.25rem)",
                 duration: DUR.section,
                 ease: EASE.cine,
+                onStart: () => markEntered(el),
                 onComplete: settle,
                 scrollTrigger: trigger,
               },
@@ -180,6 +183,7 @@ export function ServiceAccordion({ items }: { items: readonly AccordionItem[] })
                 duration: DUR.reveal,
                 stagger: 0.07,
                 ease: EASE.cine,
+                onStart: () => markEntered(el),
                 onComplete: settle,
                 scrollTrigger: trigger,
               },
@@ -195,6 +199,10 @@ export function ServiceAccordion({ items }: { items: readonly AccordionItem[] })
       const watchdog = window.setTimeout(() => {
         if (!entry || entry.isActive() || entry.progress() > 0) return;
         if (!inViewport(el)) return;
+        // Killed, not merely overwritten: a resolved band with a live trigger
+        // still aimed at it replays the whole entrance when that trigger fires.
+        entry.scrollTrigger?.kill();
+        entry.kill();
         settle();
       }, 3000);
 

@@ -4,9 +4,11 @@ import { useEffect, useLayoutEffect, useRef } from "react";
 import {
   gsap,
   registerGsap,
-  motionMedia,
+  MQ,
   prefersReducedMotion,
   inViewport,
+  hasEntered,
+  markEntered,
   EASE,
   DUR,
   STAGGER,
@@ -120,54 +122,101 @@ export function MaskLines({
     // Already correct in the markup — nothing to restore.
     if (prefersReducedMotion()) return;
 
-    return motionMedia(el, (c) => {
-      /*
-       * `y: 0` is not belt and braces. GSAP does not read a percentage
-       * translate as a percentage — it reads the COMPUTED MATRIX, where the
-       * percentage has already been resolved against the line box, and caches
-       * what it finds as a pixel `y`. `y` and `yPercent` then COMPOSE rather
-       * than being exclusive, so a tween touching only `yPercent` animates
-       * 135% → 0% on top of a retained pixel offset and the line comes to
-       * rest exactly where it started. Passing `y: 0` hands the axis back.
-       */
-      const tween = gsap.fromTo(
-        targets,
-        { y: 0, yPercent: c.isMobile ? TRAVEL * 0.8 : TRAVEL, opacity: 0 },
-        {
-          y: 0,
-          yPercent: 0,
-          opacity: 1,
-          duration: c.isMobile ? DUR.reveal + 0.15 : DUR.cinematic,
-          stagger: STAGGER.lines,
-          delay,
-          ease: EASE.deep,
-          scrollTrigger:
-            onScroll && !inViewport(el, -40)
-              ? { trigger: el, start: START, once: true }
-              : undefined,
-        },
-      );
+    /*
+     * ALREADY RISEN ON THIS NODE. Restore the resting state and stop.
+     * Covers a Strict Mode remount, and any other remount that reuses the
+     * same elements.
+     */
+    if (hasEntered(el)) {
+      gsap.set(targets, { y: 0, yPercent: 0, opacity: 1 });
+      return;
+    }
 
-      /*
-       * The watchdog, and it is scoped to exactly one failure.
-       *
-       * A line below the fold that has not revealed is CORRECT — it has not
-       * been scrolled to. A line sitting in the viewport that has not
-       * revealed is a trigger that mis-measured, against pre-swap font
-       * metrics or a layout that moved underneath it, and from here the two
-       * are indistinguishable except by that test. So the check is: three
-       * seconds in, if this headline is on screen and still hidden, put it
-       * on screen. Losing the animation is not a defect; losing the headline
-       * is, and this component has lost one before.
-       */
-      const watchdog = window.setTimeout(() => {
-        if (tween.isActive() || tween.progress() > 0) return;
-        if (!inViewport(el)) return;
-        gsap.set(targets, { y: 0, yPercent: 0, opacity: 1 });
-      }, 3000);
+    /*
+     * NO `matchMedia` HERE, AND REMOVING IT IS THE FIX FOR A HEADLINE THAT
+     * REPLAYED ITSELF.
+     *
+     * This effect used to run inside `motionMedia`, which re-runs its handler
+     * whenever ANY of the five queries it registers changes state — and a
+     * "change" is far cheaper to trigger than it sounds. A scrollbar
+     * appearing or disappearing moves the viewport width by about 15px, and
+     * the intro curtain does exactly that twice on every first load when it
+     * sets and clears `body { overflow: hidden }`. Every re-run built a fresh
+     * `fromTo`, so the headline parked itself and rose a second time, seconds
+     * after it had finished. On the interior pages, where these lines are the
+     * hero, that is the whole opening playing twice.
+     *
+     * The `hasEntered` latch did not save it, because the latch was checked
+     * OUTSIDE the handler — once, at setup — while the tween was rebuilt
+     * INSIDE it. Guard and animation have to sit on the same side.
+     *
+     * The deeper point is that this component never needed a media query at
+     * all. It has exactly one entrance, it plays once, and it is finished:
+     * re-tuning its travel distance for a breakpoint the reader crossed
+     * afterwards is work with no observable result. So the breakpoint is read
+     * ONCE, here, and nothing is left listening. Compare `ClipReveal`, which
+     * keeps `matchMedia` because its PARALLAX is ongoing and genuinely has to
+     * respond to the viewport — and which guards its one-shot wipe inside the
+     * handler for exactly this reason.
+     */
+    const isMobile = window.matchMedia(MQ.mobile).matches;
 
-      return () => window.clearTimeout(watchdog);
-    });
+    /*
+     * `y: 0` is not belt and braces. GSAP does not read a percentage
+     * translate as a percentage — it reads the COMPUTED MATRIX, where the
+     * percentage has already been resolved against the line box, and caches
+     * what it finds as a pixel `y`. `y` and `yPercent` then COMPOSE rather
+     * than being exclusive, so a tween touching only `yPercent` animates
+     * 135% → 0% on top of a retained pixel offset and the line comes to rest
+     * exactly where it started. Passing `y: 0` hands the axis back.
+     */
+    const tween = gsap.fromTo(
+      targets,
+      { y: 0, yPercent: isMobile ? TRAVEL * 0.8 : TRAVEL, opacity: 0 },
+      {
+        y: 0,
+        yPercent: 0,
+        opacity: 1,
+        duration: isMobile ? DUR.reveal + 0.15 : DUR.cinematic,
+        stagger: STAGGER.lines,
+        delay,
+        ease: EASE.deep,
+        onStart: () => markEntered(el),
+        scrollTrigger:
+          onScroll && !inViewport(el, -40)
+            ? { trigger: el, start: START, once: true }
+            : undefined,
+      },
+    );
+
+    /*
+     * The watchdog, and it is scoped to exactly one failure.
+     *
+     * A line below the fold that has not revealed is CORRECT — it has not
+     * been scrolled to. A line sitting in the viewport that has not revealed
+     * is a trigger that mis-measured, against pre-swap font metrics or a
+     * layout that moved underneath it, and from here the two are
+     * indistinguishable except by that test. So the check is: three seconds
+     * in, if this headline is on screen and still hidden, put it on screen.
+     * Losing the animation is not a defect; losing the headline is, and this
+     * component has lost one before.
+     */
+    const watchdog = window.setTimeout(() => {
+      if (tween.isActive() || tween.progress() > 0) return;
+      if (!inViewport(el)) return;
+      // Killed, not merely overwritten. A resolved line with a live trigger
+      // still aimed at it replays the whole entrance the moment that trigger
+      // fires — the reader sees the headline, then sees it arrive.
+      tween.scrollTrigger?.kill();
+      tween.kill();
+      gsap.set(targets, { y: 0, yPercent: 0, opacity: 1 });
+    }, 3000);
+
+    return () => {
+      window.clearTimeout(watchdog);
+      tween.scrollTrigger?.kill();
+      tween.kill();
+    };
   }, [delay, onScroll]);
 
   return (

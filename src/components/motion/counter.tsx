@@ -6,6 +6,8 @@ import {
   registerGsap,
   prefersReducedMotion,
   inViewport,
+  hasEntered,
+  markEntered,
   EASE,
 } from "@/lib/motion";
 
@@ -75,7 +77,9 @@ export function Counter({
     if (!el) return;
 
     registerGsap();
-    if (prefersReducedMotion()) return;
+    // Nothing to restore: `immediateRender: false` means an already-counted
+    // numeral is simply sitting at its final value.
+    if (prefersReducedMotion() || hasEntered(el)) return;
 
     const format = (n: number) =>
       `${prefix}${n.toLocaleString("en-CA", {
@@ -97,6 +101,7 @@ export function Counter({
         // The load-bearing line. Nothing is written to the DOM until this
         // tween actually runs — see the note above the component.
         immediateRender: false,
+        onStart: () => markEntered(el),
         onUpdate: () => {
           el.textContent = format(state.n);
         },

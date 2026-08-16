@@ -84,16 +84,34 @@ export default function FleetPage() {
 
       <PageHero
         eyebrow="Fleet"
+        meta={`${FLEET.length} configurations · ${DIVISIONS.length} divisions`}
         headingId="fleet-heading"
         heading={`${FLEET.length} configurations, ${DIVISIONS.length} divisions, one operator`}
+        /*
+          The visible lines carry no counts, deliberately. They are hand-broken
+          and would have to be re-authored every time the fleet model changes;
+          the `heading` above derives its figures from `FLEET` and `DIVISIONS`
+          and is the string that actually gets announced.
+        */
+        lines={[
+          { text: "Every unit,", drift: 20 },
+          { text: "one standard.", indent: "lg:pl-[11%]", drift: -28 },
+        ]}
         lead={`${COMPANY.positioning} — kept modern, maintained to a documented standard, and configured so the right unit shows up rather than the one that happened to be free.`}
+        cta={{ label: "Request a quote", href: "/quote" }}
         facts={[
           { k: "Configurations", v: String(FLEET.length) },
           { k: "Divisions", v: DIVISIONS.map((d) => d.name).join(" · ") },
           { k: "Terminal", v: `${COMPANY.address.city}, ${COMPANY.address.region}` },
           { k: "Coverage", v: COMPANY.serviceArea },
         ]}
-        plate={IMAGES.terminalAerial}
+        /*
+          The fleet in formation, which is the page's subject stated as a
+          picture. /about takes the highway shot: both pages ran
+          `terminalAerial` before and opened identically, which made them read
+          as one page with two headings.
+        */
+        plate={IMAGES.fleetTerminal}
       />
       <Divisions />
       <Register />

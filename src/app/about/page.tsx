@@ -58,16 +58,29 @@ export default function AboutPage() {
 
       <PageHero
         eyebrow="About"
+        meta={`Est. ${COMPANY.founded} · ${COMPANY.address.city}`}
         headingId="about-heading"
-        heading="Fifteen years of moving Ontario"
+        heading={`${COMPANY.yearsInOperation} years of moving Ontario`}
+        lines={[
+          { text: "Fifteen years", drift: 22 },
+          { text: "of moving Ontario.", indent: "lg:pl-[10%]", drift: -28 },
+        ]}
         lead={`${COMPANY.positioning} — moving bulk, liquid, waste and open-deck freight for the projects that reshape the Greater Toronto Area.`}
+        cta={{ label: "Request a quote", href: "/quote" }}
         facts={[
           { k: "Founded", v: String(COMPANY.founded) },
           { k: "Terminal", v: `${COMPANY.address.city}, ${COMPANY.address.region}` },
           { k: "Coverage", v: COMPANY.serviceArea },
           { k: "Member of", v: AFFILIATIONS.map((a) => a.abbr).join(" · ") },
         ]}
-        plate={IMAGES.terminalAerial}
+        /*
+          A truck ON the highway, not a yard full of parked ones. The heading
+          says "fifteen years of moving Ontario" and this page is about the
+          operation rather than the equipment — a static terminal argues the
+          opposite of the sentence above it. /fleet takes the formation shot,
+          where a row of parked units is exactly the subject.
+        */
+        plate={IMAGES.heroHighway}
       />
       <Statement />
       <Record />

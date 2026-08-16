@@ -14,6 +14,8 @@ import {
   registerGsap,
   prefersReducedMotion,
   onPageEntrance,
+  hasEntered,
+  markEntered,
   EASE,
   DUR,
   STAGGER,
@@ -62,7 +64,10 @@ export function SiteHeader() {
     if (!el) return;
 
     registerGsap();
-    if (prefersReducedMotion()) return;
+    // `gsap.from()` makes a repeat harmless to the final state, but a header
+    // that drops in twice on every dev reload is still a header dropping in
+    // twice. Mounted in the root layout, so this latches for the session.
+    if (prefersReducedMotion() || hasEntered(el)) return;
 
     const marks = el.querySelectorAll<HTMLElement>("[data-mark]");
     const ctx = gsap.context(() => {}, el);
@@ -76,6 +81,7 @@ export function SiteHeader() {
             opacity: 0,
             duration: DUR.cinematic,
             ease: EASE.cine,
+            onStart: () => markEntered(el),
           })
           .from(
             marks,

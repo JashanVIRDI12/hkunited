@@ -33,12 +33,12 @@ interface SplitHeadingProps {
  * design decision, it is a guess that is wrong at two widths out of three —
  * and a mask measured against the wrong line box clips a line in half.
  *
- * SPLITTEXT RE-SPLITS ITSELF, which is the reason it is worth the plugin
- * here. `autoSplit` re-measures on resize AND on font load, and this site
- * loads its display serif with `display: swap` — so every heading's line
- * breaks change once, after first paint, on every cold visit. A hand-rolled
- * splitter would have to reimplement that, and the version that does not is
- * exactly the version that ships masks measured against Georgia.
+ * THE SPLIT IS TEMPORARY. It is created once the webfont has landed, used to
+ * animate the lines, and reverted the moment the reveal completes — so what
+ * sits on the page afterwards is the original heading, reflowing natively at
+ * any width. Nothing observes it and nothing can replay it. See `revealLines`
+ * for why that matters: keeping the split alive is what made headings perform
+ * their entrance twice.
  *
  * ACCESSIBILITY IS THE PLUGIN'S, NOT OURS. `aria: "auto"` puts an
  * `aria-label` carrying the original string on the element and hides the

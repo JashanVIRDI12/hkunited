@@ -1,6 +1,9 @@
 import { Reveal } from "@/components/motion/reveal";
 import { TextLink } from "@/components/ui/button";
 import { SplitHeading } from "@/components/motion/split-heading";
+import { IMAGES } from "@/content/imagery";
+import { Media } from "@/components/ui/media";
+import { ClipReveal } from "@/components/motion/clip-reveal";
 
 /**
  * What the three studies share.
@@ -50,6 +53,28 @@ export function Common() {
               <div className="mt-10">
                 <TextLink href="/safety">How that discipline is held</TextLink>
               </div>
+
+              {/*
+                A fourth site, deliberately NOT one of the three studies below
+                — a quarry rather than a dig, a corridor or a paving train. The
+                section argues that one discipline runs across different work,
+                and illustrating it with work the page has not itemised is what
+                keeps that from reading as a caption to the deck above.
+              */}
+              <ClipReveal
+                from="left"
+                parallax={6}
+                ratio="4/3"
+                className="mt-12 w-full rounded-plate"
+              >
+                <Media
+                  asset={IMAGES.industryMining}
+                  ratio="auto"
+                  radius="none"
+                  className="h-full w-full"
+                  sizes="(max-width: 1024px) 100vw, 30vw"
+                />
+              </ClipReveal>
             </div>
           </div>
 

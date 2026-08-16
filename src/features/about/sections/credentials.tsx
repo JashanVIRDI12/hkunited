@@ -7,6 +7,7 @@ import { TextLink } from "@/components/ui/button";
 import { Reveal } from "@/components/motion/reveal";
 import { SplitHeading } from "@/components/motion/split-heading";
 import { ClipReveal } from "@/components/motion/clip-reveal";
+import { CredentialMark } from "@/features/about/sections/credential-mark";
 
 /**
  * Credentials.
@@ -54,8 +55,14 @@ export function Credentials() {
       <Reveal stagger variant="cards" className="mt-10 grid gap-3 md:mt-14 lg:grid-cols-12">
         {AFFILIATIONS.map((affiliation) => (
           <Panel key={affiliation.abbr} tone="paper" className="p-7 lg:col-span-4">
+            {/*
+              The abbreviation resolves out of noise as it is reached — the
+              site's only scrambled text, spent on its only third-party
+              credential. See `credential-mark.tsx` for why it is legitimate
+              here and would not be anywhere else.
+            */}
             <p className="font-display text-[clamp(2.5rem,4.5vw,4rem)] leading-none tracking-[-0.016em] text-brand">
-              {affiliation.abbr}
+              <CredentialMark text={affiliation.abbr} />
             </p>
             <h3 className="mt-7 max-w-[20ch] text-[1.0625rem] leading-snug tracking-tight text-ink">
               {affiliation.name}

@@ -3,6 +3,7 @@ import { COMPANY } from "@/content/company";
 import { EnquiryForm } from "@/features/enquiry/form";
 import { Reveal } from "@/components/motion/reveal";
 import { SplitHeading } from "@/components/motion/split-heading";
+import { ProcessSpine } from "@/features/quote/sections/process-spine";
 
 /**
  * The request.
@@ -47,7 +48,13 @@ export function Request() {
             <div className="lg:sticky lg:top-32">
               <h3 className="eyebrow mb-8">How a job runs</h3>
 
-              <ol className="border-t border-line-strong">
+              {/*
+                `relative` so the spine can position itself against the list
+                it tracks — it measures that list's height and draws itself
+                down the gutter as the steps are read.
+              */}
+              <ol className="relative border-t border-line-strong">
+                <ProcessSpine steps={PROCESS.length} />
                 {PROCESS.map((step) => (
                   <li
                     key={step.index}

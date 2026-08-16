@@ -34,20 +34,50 @@
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
+import { CustomEase } from "gsap/CustomEase";
+import { DrawSVGPlugin } from "gsap/DrawSVGPlugin";
+import { ScrambleTextPlugin } from "gsap/ScrambleTextPlugin";
 
 let registered = false;
 
 /**
  * Idempotent plugin registration.
  *
- * SplitText ships in the public `gsap` package under the standard licence
- * from 3.13 onward, so it is used directly rather than hand-rolling a
- * splitter. It is the only splitting mechanism on the site.
+ * EVERY GSAP PLUGIN IS FREE from 3.13 onward, including the ones that were
+ * Club-only for years — SplitText, DrawSVG, ScrambleText, MorphSVG. They all
+ * ship inside the public `gsap` package, so none of them needs a token, a
+ * private registry or a membership. Parts of this codebase were written
+ * against the old licensing and worked around it by hand; where that happened
+ * the workaround has been removed and the note corrected.
+ *
+ * Only what the site actually uses is registered. Every plugin named here is
+ * bundled into the client, so an unused one is dead weight shipped to every
+ * visitor.
  */
 export function registerGsap() {
   if (registered || typeof window === "undefined") return;
 
-  gsap.registerPlugin(ScrollTrigger, SplitText);
+  gsap.registerPlugin(
+    ScrollTrigger,
+    SplitText,
+    CustomEase,
+    DrawSVGPlugin,
+    ScrambleTextPlugin,
+  );
+
+  /*
+   * THE STYLESHEET'S CURVE, AVAILABLE TO GSAP.
+   *
+   * `globals.css` publishes `--ease-brand: cubic-bezier(0.16, 1, 0.3, 1)` and
+   * every CSS transition on the site uses it. GSAP had no access to that
+   * curve, so hover states and scroll reveals were easing on two similar but
+   * non-identical functions — close enough that nobody could name the
+   * problem, far enough apart that a card whose shadow is transitioned by CSS
+   * and whose position is tweened by GSAP arrived in two stages.
+   *
+   * Registering it once means both halves of the system can share one curve.
+   */
+  CustomEase.create("brand", "0.16, 1, 0.3, 1");
 
   ScrollTrigger.config({ ignoreMobileResize: true });
 
@@ -90,6 +120,17 @@ export const EASE = {
    * hand and the effect immediately reads as lag rather than as depth.
    */
   none: "none",
+
+  /**
+   * THE STYLESHEET'S OWN CURVE — `--ease-brand`, registered as a GSAP ease
+   * by `registerGsap`.
+   *
+   * Reach for it whenever a GSAP tween runs ALONGSIDE a CSS transition on the
+   * same element or its neighbour, so the two arrive together. Everywhere
+   * else the four curves above are the vocabulary; this exists to close the
+   * seam between the two halves of the system, not to widen it.
+   */
+  brand: "brand",
 } as const;
 
 /* ============================================================
@@ -212,6 +253,51 @@ export function prefersReducedMotion(): boolean {
    TRIGGER SAFETY
    ============================================================ */
 
+/**
+ * ONE ENTRANCE PER ELEMENT, EVER.
+ *
+ * THE BUG THIS FIXES: every entrance on the site played twice in development,
+ * on every page. React Strict Mode — on by default in the App Router since
+ * Next 13.5 — deliberately runs each effect twice on mount: setup, cleanup,
+ * setup. The cleanup reverts GSAP correctly, so nothing leaks; but the first
+ * pass has already PAINTED. The reader sees the headline rise, snap back and
+ * rise again.
+ *
+ * It looked like the homepage was exempt and it never was. Home's reveals sit
+ * below the fold, so they are scroll-triggered: both setups happen long before
+ * anything is scrolled to, and only the surviving trigger ever fires. The
+ * interior pages put the same reveals above the fold, where they play on mount
+ * — so both passes played, back to back, which is where it was visible.
+ *
+ * WHY THE LATCH LIVES ON THE DOM NODE. A flag in the effect's closure is
+ * useless here: Strict Mode's second pass is a genuinely new closure. React
+ * reuses the same DOM elements across that remount, so the element itself is
+ * the only thing that persists between the two — and it is also exactly the
+ * right lifetime. A route change builds new nodes, so a genuine navigation
+ * still gets its entrance.
+ *
+ * CLAIM IT WHEN THE ANIMATION STARTS, NEVER AT SETUP. Latching at setup time
+ * would mean a scroll-triggered reveal marks itself entered, gets torn down by
+ * Strict Mode, and the second pass then skips creating the trigger at all —
+ * leaving parked content that nothing will ever release. That is the failure
+ * this codebase has shipped twice already. `markEntered` belongs in `onStart`.
+ *
+ * This is not merely a development workaround: an entrance is an event, and an
+ * event that fires twice for one arrival is wrong in any build.
+ */
+const ENTERED = "hkEntered";
+
+/** Has this element already performed its entrance? */
+export function hasEntered(el: Element): boolean {
+  return (el as HTMLElement).dataset?.[ENTERED] === "1";
+}
+
+/** Latch it. Call from a tween's `onStart` — never at setup time. */
+export function markEntered(el: Element): void {
+  const node = el as HTMLElement;
+  if (node.dataset) node.dataset[ENTERED] = "1";
+}
+
 /** Is any part of the element inside the viewport right now? */
 export function inViewport(el: Element, slack = 0): boolean {
   const r = el.getBoundingClientRect();
@@ -267,26 +353,56 @@ export function safeReveal(
   delete resolved.delay;
   delete resolved.ease;
 
-  if (prefersReducedMotion()) {
+  const root = trigger ?? els[0];
+
+  // Already performed on these nodes — a Strict Mode remount, or a parent
+  // re-rendering around them. Place them and leave; do not perform again.
+  if (prefersReducedMotion() || hasEntered(root)) {
     gsap.set(els, resolved);
     return () => {};
   }
 
-  const root = trigger ?? els[0];
   let done = false;
 
   const tween = gsap.fromTo(els, from, {
     ...to,
     onStart: () => {
       done = true;
+      markEntered(root);
     },
     scrollTrigger: inViewport(root, -40)
       ? undefined
       : { trigger: root, start, once: true },
   });
 
+  /*
+   * THE WATCHDOG, AND IT IS SCOPED TO EXACTLY ONE FAILURE.
+   *
+   * The first build of this fired on a bare timer and did not look at where
+   * the element was, which turned it from a safety net into a bug generator.
+   * Anything still below the fold at the timeout — the bottom sections of any
+   * long page — was resolved to its final state while its scroll trigger was
+   * left ARMED. Scrolling down then fired that trigger, which yanked the
+   * section back to `opacity: 0` and played the entire reveal again. The
+   * reader saw the content, then saw it animate in. On /fleet that was the
+   * material matrix and the closing card, every time.
+   *
+   * Two corrections, and both are needed:
+   *
+   *  · BELOW THE FOLD AND UNREVEALED IS CORRECT. It has not been reached yet.
+   *    Only content sitting ON SCREEN and still hidden indicates a trigger
+   *    that mis-measured — against pre-swap font metrics, or a layout that
+   *    moved underneath it — and that is the only case worth rescuing.
+   *  · RESCUING MEANS KILLING THE TWEEN, not just setting the values. A
+   *    resolved element with a live trigger still pointing at it is precisely
+   *    the replay described above.
+   */
   const watchdog = window.setTimeout(() => {
-    if (!done && !tween.isActive()) gsap.set(els, resolved);
+    if (done || tween.isActive() || tween.progress() > 0) return;
+    if (!inViewport(root)) return;
+    tween.scrollTrigger?.kill();
+    tween.kill();
+    gsap.set(els, resolved);
   }, failsafe);
 
   return () => {
@@ -401,19 +517,41 @@ export function revealCards(
  * shaved by a too-tight line box, and the plugin's wrapper does not have
  * that problem.
  *
- * `autoSplit: true` re-splits on font load and on resize. That matters here
- * specifically — this site loads Instrument Serif with `display: swap`, so
- * every headline's line breaks change once after first paint. Without it,
- * masks measured against Georgia stay measured against Georgia.
+ * SPLIT ONCE, THEN TORN DOWN — AND THAT IS THE FIX FOR HEADINGS THAT
+ * REVEALED TWICE.
+ *
+ * The obvious build uses `autoSplit: true`, which re-splits whenever the line
+ * boxes could have changed, and animates inside `onSplit`. It has to, because
+ * a mask measured against the fallback face is measured wrong once Instrument
+ * Serif swaps in. But every re-split calls `onSplit` again, and every one of
+ * those triggers is cheaper than it looks: the font swap on every cold load,
+ * any window resize, and a scrollbar appearing or disappearing — which the
+ * intro curtain causes twice by toggling `body { overflow: hidden }`. Each
+ * re-split rebuilt the reveal, so headings performed their entrance a second
+ * time, seconds after finishing. Latches inside `onSplit` only ever narrowed
+ * the window; the mechanism was still there to fire.
+ *
+ * So the split is not kept alive at all. The element is split ONCE, after
+ * `document.fonts.ready` — which is the only moment worth measuring at, and
+ * removes the reason `autoSplit` existed — and `onComplete` REVERTS the split
+ * the instant the reveal finishes. What is left on the page afterwards is the
+ * original, unsplit heading: plain text that reflows natively at any width,
+ * with no wrappers, no observers and nothing left that could animate again.
+ *
+ * That also means a resize after the reveal needs no handling whatsoever. The
+ * split only exists for the second or so it is being animated.
+ *
+ * `mask: "lines"` has SplitText build the overflow-hidden wrapper per line —
+ * fiddly to get right by hand, as `MaskLines`' long note on shaved descenders
+ * attests.
  *
  * `aria: "auto"` puts an `aria-label` carrying the original string on the
- * element and hides the generated line spans, so the headline is announced
- * once, intact, exactly as it reads. This is why no `sr-only` duplicate is
- * needed — the plugin handles the contract that `MaskLines` handled by hand.
+ * element and hides the generated line spans, so the heading is announced
+ * once, intact, for the brief window it is split at all.
  *
- * The element is NOT parked in markup: it renders as ordinary text, and the
- * split plus the start state are applied together in `onSplit`. If this code
- * never runs the headline is simply a headline.
+ * The element is NEVER parked in markup: it renders as ordinary text and is
+ * split by the same code that animates it. If this never runs — or runs after
+ * the watchdog has given up — the heading is simply a heading.
  */
 export function revealLines(
   el: HTMLElement,
@@ -438,56 +576,67 @@ export function revealLines(
     immediate = false,
   } = options;
 
-  if (prefersReducedMotion()) return () => {};
+  if (prefersReducedMotion() || hasEntered(el)) return () => {};
 
+  let split: SplitText | undefined;
   let tween: gsap.core.Tween | undefined;
+  let cancelled = false;
 
-  const split = SplitText.create(el, {
-    type: "lines",
-    mask: "lines",
-    aria: "auto",
-    autoSplit: true,
-    linesClass: "reveal-line",
-    onSplit: (self) => {
-      /*
-       * The previous pass's ScrollTrigger is killed by hand, and it has to
-       * be. SplitText kills the tween it was handed before re-splitting, but
-       * a ScrollTrigger is a separate object registered with the global
-       * scroll system — it outlives its tween. `autoSplit` re-splits on every
-       * resize AND once more when the display webfont swaps, so without this
-       * a visitor who drags a window across a few widths accumulates a
-       * ScrollTrigger per width, each still measuring against line elements
-       * that no longer exist.
-       */
-      tween?.scrollTrigger?.kill();
+  /** Put the element back to plain, unsplit markup. */
+  const unsplit = () => {
+    split?.revert();
+    split = undefined;
+  };
 
-      // Returning the tween hands it to SplitText, which kills it before a
-      // re-split — without that, the outgoing tween goes on writing
-      // transforms to detached line elements.
-      tween = gsap.fromTo(
-        self.lines,
-        { yPercent: 105, opacity: 0 },
-        {
-          yPercent: 0,
-          opacity: 1,
-          duration,
-          stagger,
-          delay,
-          ease: EASE.deep,
-          scrollTrigger:
-            immediate || inViewport(trigger ?? el, -40)
-              ? undefined
-              : { trigger: trigger ?? el, start, once: true },
-        },
-      );
-      return tween;
-    },
-  });
+  const build = () => {
+    // The component can unmount, or the heading can be revealed by the
+    // watchdog, while the font promise below is still pending.
+    if (cancelled || hasEntered(el)) return;
+
+    split = SplitText.create(el, {
+      type: "lines",
+      mask: "lines",
+      aria: "auto",
+      autoSplit: false,
+      linesClass: "reveal-line",
+    });
+
+    tween = gsap.fromTo(
+      split.lines,
+      { yPercent: 105, opacity: 0 },
+      {
+        yPercent: 0,
+        opacity: 1,
+        duration,
+        stagger,
+        delay,
+        ease: EASE.deep,
+        onStart: () => markEntered(el),
+        // THE SPLIT IS TORN DOWN THE MOMENT IT HAS DONE ITS JOB.
+        onComplete: unsplit,
+        scrollTrigger:
+          immediate || inViewport(trigger ?? el, -40)
+            ? undefined
+            : { trigger: trigger ?? el, start, once: true },
+      },
+    );
+  };
+
+  /*
+   * SPLIT ONCE THE DISPLAY FACE HAS LANDED. The masks are measured against
+   * real line boxes, and this site loads Instrument Serif with `display:
+   * swap` — so every heading's line breaks change once, after first paint.
+   * Measuring before that means measuring against Georgia.
+   */
+  const fonts = typeof document !== "undefined" ? document.fonts : undefined;
+  if (!fonts || fonts.status === "loaded") build();
+  else fonts.ready.then(build).catch(build);
 
   return () => {
+    cancelled = true;
     tween?.scrollTrigger?.kill();
     tween?.kill();
-    split.revert();
+    unsplit();
   };
 }
 

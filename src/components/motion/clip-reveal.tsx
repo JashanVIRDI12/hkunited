@@ -6,6 +6,8 @@ import {
   registerGsap,
   motionMedia,
   prefersReducedMotion,
+  hasEntered,
+  markEntered,
   EASE,
   DUR,
   START,
@@ -124,35 +126,50 @@ export function ClipReveal({
        * enhancement of it — dropping it on mobile would leave the image with
        * no entrance at all. What mobile drops is the DEPTH work below, which
        * is what actually costs something on a phone.
+       *
+       * IT RUNS ONCE PER ELEMENT, THOUGH. This wipe is not scrubbed — unlike
+       * the parallax below it, which is driven by scroll position and so
+       * self-corrects if it is ever set up twice. A one-shot entrance does
+       * not: build it twice and it plays twice. Above the fold, where the
+       * trigger fires the instant it is created, the two plays land back to
+       * back and the image visibly wipes in, resets and wipes in again.
+       * That is what a Strict Mode remount does to every interior page hero
+       * on this site, /about's included.
        */
-      const tl = gsap.timeline({
-        delay,
-        scrollTrigger: { trigger: el, start: START, once: true },
-      });
+      if (hasEntered(el)) {
+        gsap.set(el, { clipPath: OPEN });
+        if (scale) gsap.set(inner, { scale: 1 });
+      } else {
+        const tl = gsap.timeline({
+          delay,
+          scrollTrigger: { trigger: el, start: START, once: true },
+        });
 
-      tl.fromTo(
-        el,
-        { clipPath: HIDDEN[from] },
-        {
-          clipPath: OPEN,
-          // Mobile reveals are shorter: a phone scrolls faster than a wheel,
-          // and a 1.25s wipe is still finishing when the image has left.
-          duration: c.isMobile ? DUR.reveal : duration,
-          ease: EASE.cine,
-        },
-      );
-
-      if (scale) {
         tl.fromTo(
-          inner,
-          { scale: 1.08 },
+          el,
+          { clipPath: HIDDEN[from] },
           {
-            scale: 1,
-            duration: (c.isMobile ? DUR.reveal : duration) + 0.3,
+            clipPath: OPEN,
+            // Mobile reveals are shorter: a phone scrolls faster than a wheel,
+            // and a 1.25s wipe is still finishing when the image has left.
+            duration: c.isMobile ? DUR.reveal : duration,
             ease: EASE.cine,
+            onStart: () => markEntered(el),
           },
-          0,
         );
+
+        if (scale) {
+          tl.fromTo(
+            inner,
+            { scale: 1.08 },
+            {
+              scale: 1,
+              duration: (c.isMobile ? DUR.reveal : duration) + 0.3,
+              ease: EASE.cine,
+            },
+            0,
+          );
+        }
       }
 
       /*

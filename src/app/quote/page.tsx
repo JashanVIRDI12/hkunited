@@ -3,7 +3,8 @@ import { FLEET } from "@/content/fleet";
 import { SERVICES } from "@/content/services";
 import { pageMeta, breadcrumbSchema, jsonLd } from "@/lib/seo";
 
-import { PageMasthead } from "@/components/layout/page-masthead";
+import { IMAGES } from "@/content/imagery";
+import { PageHero } from "@/components/layout/page-hero";
 import { Request } from "@/features/quote/sections/request";
 import { Direct } from "@/features/quote/sections/direct";
 
@@ -53,8 +54,9 @@ export default function QuotePage() {
         }}
       />
 
-      <PageMasthead
+      <PageHero
         eyebrow="Request a quote"
+        meta={`${SERVICES.length} lines · ${FLEET.length} configurations`}
         headingId="quote-heading"
         heading="Material, volume, site, schedule."
         lines={[
@@ -68,6 +70,16 @@ export default function QuotePage() {
           { k: "Scale", v: "Single load to sustained" },
           { k: "Dispatch", v: COMPANY.phone },
         ]}
+        /*
+          A job being priced: a shored excavation with an excavator loading a
+          dump truck. NOTE THE TRADE — this page was deliberately photography
+          -free, on the argument that a visitor here has already decided and
+          every block before the first field is one they can abandon in. The
+          hero now costs a screen before the form. That is the price of the
+          page opening like every other one; if the form's completion rate
+          matters more than the consistency, this is the one to revert.
+        */
+        plate={IMAGES.industryConstruction}
       />
       <Request />
       <Direct />

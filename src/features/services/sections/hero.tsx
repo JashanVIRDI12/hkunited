@@ -12,18 +12,23 @@ import { Reveal } from "@/components/motion/reveal";
 /**
  * Services hero.
  *
- * A PHOTOGRAPHIC PLATE, WHICH IS A DEPARTURE FROM THE INTERIOR SET. The other
- * interior pages open on `PageMasthead` — sheared display type on white with
- * the plate held back until after the standfirst. That is a good opening for
- * a page someone is going to READ, and this is not one of those: /services is
- * where a superintendent lands from a search and decides in about two seconds
- * whether this carrier runs work at their scale. Type alone does not answer
- * that. A night paving train does.
+ * A PHOTOGRAPHIC PLATE — and this composition is now THE INTERIOR SET rather
+ * than a departure from it. It began as the exception: the other pages opened
+ * on sheared display type over white, which is a good opening for a page
+ * someone is going to READ, and /services is not one of those. It is where a
+ * superintendent lands from a search and decides in about two seconds whether
+ * this carrier runs work at their scale. Type alone does not answer that. A
+ * night paving train does.
  *
- * WHAT IT KEEPS FROM THE SET, so it reads as the same company: the hand-broken
- * display lines, the lateral shear that opens and closes the stack as it
- * passes, the technical eyebrow, and the record strip of facts. What changes
- * is the ground under them.
+ * That argument turned out to apply to every interior page, so the layout was
+ * generalised into `components/layout/page-hero.tsx` and /about, /fleet and
+ * /quote were moved onto it. THIS FILE IS THE ONE THAT DID NOT MOVE, and only
+ * because of the readout in its shoulder and nothing else — if that ever goes,
+ * this should become a `PageHero` call site like the rest.
+ *
+ * What every one of them shares: hand-broken display lines, the lateral shear
+ * that opens and closes the stack as it passes, the technical eyebrow, and the
+ * record strip of facts sitting on the plate rather than under it.
  *
  * IT CLEARS THE HEADER RATHER THAN PASSING UNDER IT. The header paints as
  * white glass everywhere except the homepage, so a plate that started at the

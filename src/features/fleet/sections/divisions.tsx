@@ -1,4 +1,6 @@
 import { FLEET, DIVISIONS } from "@/content/fleet";
+import { FLEET_IMAGE } from "@/content/imagery";
+import { Media } from "@/components/ui/media";
 import { Panel, SectionLabel } from "@/components/ui/panel";
 import { SplitHeading } from "@/components/motion/split-heading";
 import { Reveal } from "@/components/motion/reveal";
@@ -41,30 +43,57 @@ export function Divisions() {
             const units = FLEET.filter((unit) => unit.category === division.id);
 
             return (
-              <Panel key={division.id} tone="paper" className="flex flex-col p-7">
-                <div className="flex items-baseline justify-between gap-4">
-                  <h3 className="type-h3 text-ink">{division.name}</h3>
-                  <span className="tnum text-[0.6875rem] tracking-[0.16em] text-ink-4">
-                    {String(units.length).padStart(2, "0")}
-                  </span>
+              <Panel
+                key={division.id}
+                tone="paper"
+                className="group flex flex-col overflow-hidden p-0"
+              >
+                {/*
+                  THE PLATE IS DERIVED, NOT CHOSEN. It is the first unit in the
+                  division, so the card illustrates itself from the content
+                  model — add a configuration and the picture follows. A
+                  hand-picked image here would be wrong the first time the
+                  fleet changes and nobody would notice.
+
+                  NO `ClipReveal` around it. The card already arrives on the
+                  section's staggered reveal, and a wipe inside a card that is
+                  itself rising reads as two animations arguing rather than one
+                  card landing.
+                */}
+                <Media
+                  asset={FLEET_IMAGE[units[0].slug]}
+                  ratio="4/3"
+                  radius="none"
+                  className="w-full"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  zoomOnHover
+                />
+
+                <div className="flex flex-1 flex-col p-7">
+                  <div className="flex items-baseline justify-between gap-4">
+                    <h3 className="type-h3 text-ink">{division.name}</h3>
+                    <span className="tnum text-[0.6875rem] tracking-[0.16em] text-ink-4">
+                      {String(units.length).padStart(2, "0")}
+                    </span>
+                  </div>
+
+                  <p className="mt-4 max-w-[30ch] text-[0.9375rem] leading-relaxed text-ink-3">
+                    {division.blurb}
+                  </p>
+
+                  <ul className="mt-7 flex flex-col gap-2 border-t border-line pt-5">
+                    {units.map((unit) => (
+                      <li key={unit.slug}>
+                        <a
+                          href={`#${unit.slug}`}
+                          className="text-[0.9375rem] text-ink-2 transition-colors duration-500 hover:text-brand"
+                        >
+                          {unit.name}
+                        </a>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-
-                <p className="mt-4 max-w-[30ch] text-[0.9375rem] leading-relaxed text-ink-3">
-                  {division.blurb}
-                </p>
-
-                <ul className="mt-7 flex flex-col gap-2 border-t border-line pt-5">
-                  {units.map((unit) => (
-                    <li key={unit.slug}>
-                      <a
-                        href={`#${unit.slug}`}
-                        className="text-[0.9375rem] text-ink-2 transition-colors duration-500 hover:text-brand"
-                      >
-                        {unit.name}
-                      </a>
-                    </li>
-                  ))}
-                </ul>
               </Panel>
             );
           })}

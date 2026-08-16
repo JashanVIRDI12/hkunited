@@ -3,9 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import {
   gsap,
+  ScrollTrigger,
   registerGsap,
   motionMedia,
-  refreshWhenReady,
+  inViewport,
   EASE,
   DUR,
 } from "@/lib/motion";
@@ -200,9 +201,26 @@ export function PinnedTrack({
         },
       });
 
-      // Cards are set in a webfont that changes their width on swap, and the
-      // pin distance is derived from that width.
-      refreshWhenReady();
+      /*
+       * The cards are set in a webfont that changes their width on swap, and
+       * the pin distance is derived from that width — so a refresh after the
+       * fonts land is genuinely needed.
+       *
+       * BUT A GLOBAL REFRESH WITH THIS PIN ALREADY ACTIVE RECALCULATES IT
+       * UNDER THE READER and the section jumps. On a fast scroll down the
+       * page, `document.fonts.ready` can easily resolve after the pin has
+       * engaged. So the refresh is taken only while the section is still off
+       * screen; once it is in view the measurements it would correct are
+       * already the ones being used, and the correction costs more than the
+       * error.
+       */
+      const refreshIfClear = () => {
+        if (!inViewport(section)) ScrollTrigger.refresh();
+      };
+
+      const fonts = document.fonts;
+      if (!fonts || fonts.status === "loaded") refreshIfClear();
+      else fonts.ready.then(refreshIfClear).catch(() => {});
 
       return () => {
         delete section.dataset.mode;

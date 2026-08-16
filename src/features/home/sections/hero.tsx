@@ -11,6 +11,8 @@ import {
   prefersReducedMotion,
   motionMedia,
   onPageEntrance,
+  hasEntered,
+  markEntered,
   EASE,
   DUR,
   STAGGER,
@@ -118,6 +120,10 @@ export function Hero() {
       return;
     }
 
+    // A Strict Mode remount would otherwise replay the whole opening
+    // sequence a frame after the first one finished.
+    if (hasEntered(el)) return;
+
     const ctx = gsap.context(() => {}, el);
 
     /*
@@ -147,6 +153,7 @@ export function Hero() {
      */
     const play = () =>
       ctx.add(() => {
+        markEntered(el);
         gsap.set(staged, { willChange: "transform, opacity" });
 
         gsap

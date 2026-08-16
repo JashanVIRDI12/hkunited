@@ -2,6 +2,9 @@ import { SAFETY_PILLARS } from "@/content/safety";
 import { Button } from "@/components/ui/button";
 import { Reveal } from "@/components/motion/reveal";
 import { SplitHeading } from "@/components/motion/split-heading";
+import { IMAGES } from "@/content/imagery";
+import { Media } from "@/components/ui/media";
+import { ClipReveal } from "@/components/motion/clip-reveal";
 
 /**
  * Standards.
@@ -40,6 +43,26 @@ export function Standards() {
               <Button href="/safety" variant="onImageOutline" className="mt-8" arrow>
                 The full programme
               </Button>
+
+              {/*
+                The yard the standard is actually held in. A dark band with no
+                photograph asks the reader to take four claims entirely on
+                trust; one establishing frame under them is the difference
+                between an assertion and a place.
+              */}
+              <ClipReveal
+                from="left"
+                ratio="4/3"
+                className="mt-10 w-full rounded-plate"
+              >
+                <Media
+                  asset={IMAGES.terminalAerial}
+                  ratio="auto"
+                  radius="none"
+                  className="h-full w-full"
+                  sizes="(max-width: 1024px) 100vw, 30vw"
+                />
+              </ClipReveal>
             </div>
           </div>
 
