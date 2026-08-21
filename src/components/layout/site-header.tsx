@@ -8,7 +8,7 @@ import { PRIMARY_NAV } from "@/content/site";
 import { COMPANY } from "@/content/company";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Wordmark } from "@/components/layout/wordmark";
+import { Logo } from "@/components/layout/logo";
 import {
   gsap,
   registerGsap,
@@ -163,12 +163,45 @@ export function SiteHeader() {
             className="relative z-10 -m-2 p-2"
             aria-label={`${COMPANY.name} — home`}
           >
-            <Wordmark
-              className={cn(
-                "h-5 w-auto transition-colors duration-700 md:h-6",
-                overHero ? "text-white" : "text-ink",
-              )}
-            />
+            {/*
+              THE MARK ALONE — no lettering beside it. The logotype used to
+              sit here spelling "UNITED"; the client’s mark already carries
+              the brand, and the link announces the full legal name to
+              assistive tech either way, so the words were doing nothing the
+              logo and the `aria-label` were not already doing.
+
+              TWO LOGOS, CROSS-FADED, RATHER THAN ONE THAT RECOLOURS. The
+              header has two states — transparent over the homepage footage,
+              white glass once scrolled — and the mark has to invert between
+              them. Transitioning a CSS `filter` would animate a paint
+              property on every frame of that 700ms change; stacking the two
+              tones and moving OPACITY keeps it on the compositor, which is
+              the rule the rest of this site is built on.
+
+              It costs no extra request: both are the same `src`, so the
+              browser fetches one file and paints it twice.
+
+              The white copy is the one in flow, so it sizes the box; the
+              brand copy is absolutely positioned over it.
+            */}
+            <span className="relative block h-7 md:h-8">
+              <Logo
+                priority
+                tone="white"
+                className={cn(
+                  "transition-opacity duration-700 ease-[var(--ease-brand)]",
+                  overHero ? "opacity-100" : "opacity-0",
+                )}
+              />
+              <Logo
+                priority
+                tone="brand"
+                className={cn(
+                  "absolute left-0 top-0 h-full w-auto transition-opacity duration-700 ease-[var(--ease-brand)]",
+                  overHero ? "opacity-0" : "opacity-100",
+                )}
+              />
+            </span>
           </Link>
 
           <nav aria-label="Primary" data-mark className="hidden lg:block">

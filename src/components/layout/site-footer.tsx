@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { COMPANY, AFFILIATIONS } from "@/content/company";
 import { FOOTER_NAV } from "@/content/site";
-import { Wordmark } from "@/components/layout/wordmark";
+import { Logo } from "@/components/layout/logo";
 import { Reveal } from "@/components/motion/reveal";
 
 /**
@@ -77,9 +77,18 @@ export function SiteFooter() {
           </div>
         </Reveal>
 
-        {/* Closing wordmark */}
+        {/*
+          CLOSING MARK. This was the logotype stretched to the full page
+          width as a graphic; with the wordmark retired from the site it is
+          the monogram instead, at a size that reads as a sign-off rather
+          than as a banner. A square mark cannot take `w-full` — stretching
+          a logo to the width of a page is the one thing a logo may never do.
+
+          Left-aligned to the same edge every other element on this page sits
+          on, so it closes the column rather than floating in the middle of it.
+        */}
         <div className="mt-24 md:mt-32" aria-hidden="true">
-          <Wordmark className="h-auto w-full text-paper-sunk" />
+          <Logo className="h-16 opacity-25 md:h-20" sizes="160px" />
         </div>
 
         <div className="mt-10 flex flex-col gap-5 border-t border-line pt-8 md:flex-row md:items-center md:justify-between">

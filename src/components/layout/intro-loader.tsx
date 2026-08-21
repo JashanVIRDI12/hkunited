@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { gsap, registerGsap, prefersReducedMotion, EASE } from "@/lib/motion";
-import { Wordmark } from "@/components/layout/wordmark";
+import { Logo } from "@/components/layout/logo";
 
 const SEEN_KEY = "hk-intro-seen";
 
@@ -104,7 +104,12 @@ export function IntroLoader() {
       <div className="flex items-end justify-between gap-8">
         <div className="overflow-hidden">
           <div ref={markRef}>
-            <Wordmark className="h-6 w-auto text-ink md:h-9" />
+            {/*
+              The curtain is the brand reveal, so it shows the mark and
+              nothing else — the same thing the header settles into a moment
+              later. On white, so the brand tone.
+            */}
+            <Logo priority className="h-10 md:h-14" sizes="112px" />
           </div>
         </div>
         <span
